@@ -1,0 +1,294 @@
+
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Rodzinna Przygoda: Budzyń (lekka)</title>
+<style>
+:root{--bg:#fffaf3;--ink:#1d1d1f;--muted:#666;--panel:#fff;--tile:#fff;--tile-b:#eadfd2;--chance:#8ecae6}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial}
+.wrap{max-width:1000px;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+button{background:#111;color:#fff;border:none;border-radius:12px;padding:.7rem 1rem;font-size:1.05rem}
+button:disabled{opacity:.5}
+.small{color:var(--muted);font-size:.9rem}
+.panel{background:var(--panel);border:1px solid #eee;border-radius:14px;padding:10px}
+.players{display:flex;gap:8px;flex-wrap:wrap}
+.badge{display:flex;align-items:center;gap:8px;border:1px solid #eee;border-radius:999px;padding:6px 10px;background:#fff}
+.avatar{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:800}
+.board{display:grid;grid-template-columns:repeat(8,minmax(38px,1fr));gap:6px;background:#f4efe6;border:1px solid #e8e2d8;border-radius:16px;padding:8px;min-height:320px}
+.tile{background:var(--tile);border:2px solid var(--tile-b);border-radius:10px;padding:6px;position:relative;min-height:66px;display:flex;flex-direction:column;gap:4px}
+.idx{position:absolute;top:4px;left:6px;font-size:.7rem;opacity:.45}
+.tlabel{font-size:.83rem;line-height:1.1}
+.start{background:#fffbe6;border-color:#f1cd32}
+.prop::after{content:"";position:absolute;inset:auto 6px 6px 6px;height:6px;border-radius:6px;background:var(--pcolor)}
+.chance{border-color:var(--chance)}
+.challenge{border-color:#f6a5ff}
+.rest{border-color:#96d1a0}
+.piece{width:18px;height:18px;border-radius:50%;outline:2px solid #111;outline-offset:-2px;position:absolute;bottom:6px;right:6px}
+.house{width:12px;height:12px;border-radius:3px;position:absolute;top:6px;right:6px;box-shadow:0 0 0 1px #111 inset}
+.dice{width:56px;height:56px;border:2px solid #111;border-radius:12px;display:grid;place-items:center;font-size:1.6rem;background:#fff}
+.log{max-height:200px;overflow:auto;font-size:.98rem}
+@media (max-width:780px){.board{grid-template-columns:repeat(6,1fr)}.dice{width:54px;height:54px}}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:14px;z-index:10}
+.card{background:#fff;border-radius:16px;padding:14px;border:1px solid #eee;max-width:520px;width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#startOverlay{position:fixed;inset:0;background:rgba(255,255,255,.96);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}
+.start-card{background:#fff;border:1px solid #eee;border-radius:16px;padding:14px;max-width:680px;width:100%;display:flex;flex-direction:column;gap:10px}
+.select-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sel{border:2px solid #eee;border-radius:14px;padding:10px;display:flex;gap:8px;align-items:center;cursor:pointer;background:#fff}
+.sel.selected{border-color:#111;background:#fafafa}
+.sel .avatar{width:40px;height:40px;border-radius:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Rodzinna Przygoda: Budzyń (lekka)</h1>
+      <div class="small">Monopoly dla dzieci: gwiazdki, kupowanie miejsc, czynsz i domki.</div>
+    </div>
+    <div class="row">
+      <div class="dice" id="dice">🎲</div>
+      <button id="rollBtn">Rzuć kostką</button>
+      <label class="small"><input type="checkbox" id="music" checked> Muzyka</label>
+      <button id="newBtn">Nowa gra</button>
+    </div>
+  </div>
+  <div class="panel"><div class="players" id="players"></2div></div>
+  <div class="board" id="board"></div>
+  <div class="panel"><div class="small">Tura: <strong id="turnName"></strong> • Domek: 2 ⭐</div></div>
+  <div class="panel log" id="log" aria-live="polite"></div>
+  <div class="small">Cel: Zbierz zestawy kolorów i zbuduj domki. Wygrywa gracz z <strong>3 domkami</strong> lub największą liczbą domków w 15 okrążeniach.</div>
+</div>
+
+<div class="modal" id="modal"><div class="card"><h3 id="mTitle">Akcja</h3><p id="mText"></p><div class="row" id="mActions"></div></div></div>
+
+<div id="startOverlay"><div class="start-card">
+  <h2>Wybierz graczy (2–4)</h2>
+  <div class="select-grid" id="selectGrid"></div>
+  <div class="row"><button id="startBtn" disabled>Start</button><div class="small">Dostępni: Luca, Sylwia, Oli, Vicky, Leon, Nela</div></div>
+</div></div>
+
+<script>
+const PEOPLE = [{"name": "Luca", "color": "#1f2a44"}, {"name": "Sylwia", "color": "#ff7a00"}, {"name": "Oli", "color": "#e10600"}, {"name": "Vicky", "color": "#ff5fa2"}, {"name": "Leon", "color": "#8a8a8a"}, {"name": "Nela", "color": "#dc143c"}];
+const GROUPS = {"BUDZYN": {"color": "#c9a07d", "props": ["Dom Rodzinny (Budzyn)", "Dom Sąsiadów (Miky)"]}, "NATURE_FUN": {"color": "#65c18c", "props": ["Kryspinów – Jezioro", "Park Linowy", "Poletko poziomek"]}, "KRAKOW_FUN": {"color": "#e64a4a", "props": ["Kraków – Hotel Forum Area", "Park Jordana", "Park Decjusza"]}, "RESZTA_ZABAWY": {"color": "#ffd24c", "props": ["My Dream Sky (Rybna)", "Legendia (Katowice)"]}, "SPORT_EDU": {"color": "#4a90e2", "props": ["Basen w Piekarach", "Mała Akademia – Sala Pani Ania", "Mała Akademia – Sala Pani Isa"]}};
+const TILE_LIST = [{"type": "start", "label": "START – Budzyń"}, {"type": "prop", "group": "BUDZYN", "name": "Dom Rodzinny (Budzyn)"}, {"type": "chance", "label": "Szansa – Nonna Patrizia"}, {"type": "prop", "group": "BUDZYN", "name": "Dom Sąsiadów (Miky)"}, {"type": "challenge", "label": "Wyzwanie – Zio Diego"}, {"type": "prop", "group": "NATURE_FUN", "name": "Kryspinów – Jezioro"}, {"type": "prop", "group": "NATURE_FUN", "name": "Park Linowy"}, {"type": "rest", "label": "Odpoczynek – piknik"}, {"type": "prop", "group": "NATURE_FUN", "name": "Poletko poziomek"}, {"type": "chance", "label": "Szansa – Ciocia Kasia"}, {"type": "prop", "group": "KRAKOW_FUN", "name": "Kraków – Hotel Forum Area"}, {"type": "prop", "group": "KRAKOW_FUN", "name": "Park Jordana"}, {"type": "challenge", "label": "Wyzwanie – Dziadek Tosiek"}, {"type": "prop", "group": "KRAKOW_FUN", "name": "Park Decjusza"}, {"type": "rest", "label": "Odwiedziny u sąsiadów (Miky)"}, {"type": "prop", "group": "RESZTA_ZABAWY", "name": "My Dream Sky (Rybna)"}, {"type": "chance", "label": "Szansa – Babcia Urszula"}, {"type": "prop", "group": "RESZTA_ZABAWY", "name": "Legendia (Katowice)"}, {"type": "challenge", "label": "Wyzwanie – Nonno Mauro"}, {"type": "prop", "group": "SPORT_EDU", "name": "Basen w Piekarach"}, {"type": "prop", "group": "SPORT_EDU", "name": "Mała Akademia – Sala Pani Ania"}, {"type": "chance", "label": "Szansa – Ania"}, {"type": "prop", "group": "SPORT_EDU", "name": "Mała Akademia – Sala Pani Isa"}, {"type": "rest", "label": "Przerwa na lody"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}];
+const COST_BY_GROUP = {"BUDZYN": 2, "NATURE_FUN": 3, "KRAKOW_FUN": 3, "RESZTA_ZABAWY": 3, "SPORT_EDU": 3};
+const BASE_RENT = 1;
+const HOUSE_COST = 2;
+const RENT_WITH_SET = 2;
+const RENT_PER_HOUSE = 1;
+const WIN_HOUSES = 3;
+const MAX_LAPS = 15;
+
+let players = [];
+let turn = 0;
+let rolling = false;
+let owners = {};
+let setOwners = {};
+let audioCtx=null, bgOsc=null;
+
+const el=(s)=>document.querySelector(s);
+const ce=(t,c)=>{const n=document.createElement(t); if(c) n.className=c; return n;};
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+function log(msg){ const d=el('#log'); const p=ce('div'); p.textContent=msg; d.appendChild(p); d.scrollTop=d.scrollHeight; }
+
+function initAudio(){ if(audioCtx) return; audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+function startMusic(){ initAudio(); if(bgOsc) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(220,audioCtx.currentTime); g.gain.value=0.03; o.connect(g).connect(audioCtx.destination); o.start(); let f=0; setInterval(()=>{ if(!bgOsc) return; f=f===0?247:(f===247?196:220); try{o.frequency.exponentialRampToValueAtTime(f,audioCtx.currentTime+1);}catch(e){} },3000); bgOsc={osc:o,gain:g}; }
+function stopMusic(){ if(bgOsc){ try{bgOsc.osc.stop();}catch(e){} bgOsc=null; }}
+
+function svgAvatar(bg, letter){
+  return `<svg width="34" height="34" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
+    <rect rx="10" ry="10" width="34" height="34" fill="${bg}"></rect>
+    <text x="50%" y="58%" text-anchor="middle" font-size="16" font-weight="800" fill="#fff" font-family="system-ui, -apple-system, Segoe UI, Roboto">${letter}</text>
+  </svg>`;
+}
+
+function renderPlayers(){
+  const box=el('#players'); box.innerHTML='';
+  players.forEach((p,i)=>{
+    const b=ce('div','badge');
+    const av=ce('div','avatar'); av.innerHTML = svgAvatar(p.color, p.name[0].toUpperCase());
+    const t=ce('div'); t.innerHTML = `<strong>${p.name}</strong> <span class="small">• ⭐ ${p.stars} • 🏠 ${totalHouses(p)} • okr.: ${p.laps}</span>`;
+    b.append(av,t); box.appendChild(b);
+  });
+  el('#turnName').textContent = players[turn]?.name||'';
+  placePieces();
+}
+function colorForGroup(g){ return GROUPS[g]?.color || '#ddd'; }
+function renderBoard(){
+  const board=el('#board'); board.innerHTML='';
+  TILE_LIST.forEach((t,idx)=>{
+    const d=ce('div','tile '+t.type);
+    if(t.type==='prop') d.classList.add('prop');
+    d.style.setProperty('--pcolor', t.type==='prop' ? colorForGroup(t.group) : '#ddd');
+    d.innerHTML = `<div class="idx">${idx+1}</div><div class="tlabel">${t.type==='prop'?t.name:t.label||t.type.toUpperCase()}</div>`;
+    d.dataset.idx=idx;
+    if(idx===0) d.classList.add('start');
+    board.appendChild(d);
+  });
+}
+function placePieces(){
+  document.querySelectorAll('.tile .piece').forEach(x=>x.remove());
+  const tiles=[...document.querySelectorAll('.tile')];
+  players.forEach((p,i)=>{
+    const slot=tiles[p.pos];
+    const dot=ce('div','piece');
+    dot.style.background=p.color;
+    if(p.name==='Nela'){ dot.style.width='14px'; dot.style.height='14px'; }
+    slot.appendChild(dot);
+  });
+  tiles.forEach(t=>{ t.querySelectorAll('.house').forEach(x=>x.remove()); });
+  Object.keys(GROUPS).forEach(grp=>{
+    players.forEach(p=>{
+      const hcount = p.housesByGroup[grp]||0;
+      if(!hcount) return;
+      const idxs = TILE_LIST.map((t,i)=>({t,i})).filter(x=>x.t.type==='prop' && x.t.group===grp && owners[x.i]===p.id).map(x=>x.i);
+      if(!idxs.length) return;
+      const tile = tiles[idxs[0]];
+      for(let i=0;i*hcount;i++){ const h=ce('div','house'); h.style.background=p.color; h.style.top = 6 + i*14 + 'px'; tile.appendChild(h); }
+    });
+  });
+}
+
+/* start overlay */
+function buildSelect(){
+  const grid=el('#selectGrid'); grid.innerHTML='';
+  PEOPLE.forEach((p,i)=>{
+    const cell=ce('div','sel'); cell.dataset.idx=i;
+    const av=ce('div','avatar'); av.innerHTML = svgAvatar(p.color, p.name[0].toUpperCase());
+    const label=ce('div'); label.innerHTML = `<strong>${p.name}</strong>`;
+    cell.append(av,label);
+    cell.onclick=()=>{ cell.classList.toggle('selected'); updateStartBtn(); };
+    grid.appendChild(cell);
+  });
+}
+function updateStartBtn(){ const n=[...document.querySelectorAll('.sel.selected')].length; el('#startBtn').disabled=!(n>=2&&n<=4); }
+function startGameFromSelection(){
+  const sel=[...document.querySelectorAll('.sel.selected')].map(n=>+n.dataset.idx);
+  const chosen = sel.map(i=>PEOPLE[i]);
+  owners={}; setOwners={};
+  players = chosen.map((p,i)=>({id:i,name:p.name,color:p.color,pos:0,stars:3,laps:0,owned:{},housesByGroup:{}}));
+  turn=0; el('#startOverlay').style.display='none'; el('#log').innerHTML='';
+  renderPlayers(); renderBoard();
+  log('Nowa gra! Każdy startuje z 3 ⭐. Przechodzisz przez START → +2 ⭐.');
+}
+
+/* game flow */
+function nextPlayer(){ turn=(turn+1)%players.length; renderPlayers(); }
+function rollDice(){
+  if(rolling) return; rolling=true;
+  const dice=el('#dice'); let c=0;
+  const t=setInterval(()=>{ dice.textContent=rand(1,6); if(++c>10){ clearInterval(t); const v=rand(1,6); dice.textContent=v; applyRoll(v); rolling=false; } },80);
+}
+function applyRoll(v){
+  const p=players[turn]; if(!p) return;
+  log(`${p.name} rzuca ${v}.`);
+  const prev=p.pos; p.pos=(p.pos+v)%TILE_LIST.length;
+  if(prev>p.pos){ p.laps++; p.stars+=2; log(`${p.name} minął(a) START: +2 ⭐.`); }
+  renderPlayers(); resolveTile(p,p.pos);
+}
+
+function propsInGroup(grp){ return TILE_LIST.map((t,i)=>({t,i})).filter(x=>x.t.type==='prop' && x.t.group===grp); }
+function groupOwner(grp){
+  const props=propsInGroup(grp);
+  if(!props.length) return null;
+  const first=owners[props[0].i];
+  if(first==null) return null;
+  for(const pr of props){ if(owners[pr.i]!==first) return null; }
+  return first;
+}
+function totalHouses(p){ return Object.values(p.housesByGroup).reduce((a,b)=>a+b,0); }
+function canBuildHouse(p,grp){ return groupOwner(grp)===p.id; }
+function rentAmount(pOwner,grp){
+  let r = BASE_RENT;
+  if(groupOwner(grp)===pOwner.id) r = RENT_WITH_SET;
+  r += (pOwner.housesByGroup[grp]||0)*RENT_PER_HOUSE;
+  return Math.max(1,r);
+}
+
+function onProperty(p,idx,t){
+  const g=t.group; const cost=COST_BY_GROUP[g]||2;
+  const ownedBy=owners[idx];
+  if(ownedBy==null){
+    openModal('Kupno', `${t.name} — cena ${cost} ⭐. Kupić?`, [
+      {label:'Kupuję', action:()=>{ if(p.stars>=cost){ p.stars-=cost; owners[idx]=p.id; p.owned[idx]=true; renderPlayers(); log(`${p.name} kupił(a): ${t.name}.`); closeModal(); afterProperty(p,g); } else { log('Za mało gwiazdek.'); closeModal(); nextPlayer(); } }},
+      {label:'Nie teraz', action:()=>{ closeModal(); nextPlayer(); }}
+    ]);
+  } else if(ownedBy===p.id){
+    if(canBuildHouse(p,g)){
+      openModal('Budowa domku', `Masz cały zestaw. Domek kosztuje ${HOUSE_COST} ⭐.`, [
+        {label:'Buduję', action:()=>{ if(p.stars>=HOUSE_COST){ p.stars-=HOUSE_COST; p.housesByGroup[g]=(p.housesByGroup[g]||0)+1; renderPlayers(); placePieces(); log(`${p.name} zbudował(a) domek w grupie ${g}.`); closeModal(); checkWin(p); nextPlayer(); } else { log('Za mało gwiazdek.'); closeModal(); nextPlayer(); } }},
+        {label:'Później', action:()=>{ closeModal(); nextPlayer(); }}
+      ]);
+    } else { nextPlayer(); }
+  } else {
+    const owner=players.find(x=>x.id===ownedBy);
+    const r=rentAmount(owner,g);
+    const pay=Math.min(r,p.stars);
+    p.stars-=pay; owner.stars+=pay;
+    log(`${p.name} płaci czynsz ${pay} ⭐ dla ${owner.name} (stawka ${r}).`);
+    nextPlayer();
+  }
+}
+function afterProperty(p,grp){
+  const own=groupOwner(grp);
+  if(own===p.id){ setOwners[grp]=p.id; log(`${p.name} posiada cały zestaw (${GROUPS[grp].props.join(', ')}).`); }
+  nextPlayer();
+}
+
+function onChance(p,idx,t){
+  const cards=[
+    {text:'Ciasto od babci: +1 ⭐', do:()=>{ p.stars+=1; }},
+    {text:'Zgubiłeś gwiazdkę: -1 ⭐', do:()=>{ p.stars=Math.max(0,p.stars-1); }},
+    {text:'Idź 2 pola do przodu', do:()=>{ moveBy(p,2); return; }},
+    {text:'Cofnij się o 1', do:()=>{ moveBy(p,-1); return; }},
+    {text:'Wszyscy +1 ⭐', do:()=>{ players.forEach(pl=>pl.stars++); }},
+  ];
+  const c=cards[Math.floor(Math.random()*cards.length)];
+  openModal('Szansa', c.text, [{label:'OK', action:()=>{ closeModal(); if(c.do){ const res=c.do(); if(res===undefined){ renderPlayers(); nextPlayer(); } } }}]);
+}
+function onChallenge(p,idx,t){
+  const need=5; let clicks=0; const time=3000; const start=Date.now();
+  openModal('Wyzwanie', `Kliknij ${need} razy w 3 sekundy, aby zdobyć 1 ⭐.`, [{label:'Klik!', action:()=>{ clicks++; el('#mText').textContent=`Kliknięcia: ${clicks}/${need}`; if(clicks>=need){ p.stars++; closeModal(); log('Brawo! +1 ⭐'); renderPlayers(); nextPlayer(); } }}]);
+  const timer=setInterval(()=>{ if(!modalOpen()){ clearInterval(timer); return; } if(Date.now()-start>time){ clearInterval(timer); if(modalOpen()){ closeModal(); log('Nie udało się.'); nextPlayer(); } } },100);
+}
+function resolveTile(p,idx){
+  const t=TILE_LIST[idx];
+  if(t.type==='prop') onProperty(p,idx,t);
+  else if(t.type==='chance') onChance(p,idx,t);
+  else if(t.type==='challenge') onChallenge(p,idx,t);
+  else if(t.type==='rest') { log('Chwila odpoczynku.'); nextPlayer(); }
+  else nextPlayer();
+}
+function moveBy(p,delta){
+  const prev=p.pos; p.pos=(p.pos+delta)%TILE_LIST.length; if(p.pos<0) p.pos+=TILE_LIST.length;
+  renderPlayers(); resolveTile(p,p.pos);
+}
+
+function openModal(title,text,actions){ el('#mTitle').textContent=title; el('#mText').textContent=text; const box=el('#mActions'); box.innerHTML=''; actions.forEach(a=>{ const b=ce('button'); b.textContent=a.label; b.onclick=a.action; box.appendChild(b); }); el('#modal').style.display='flex'; }
+function closeModal(){ el('#modal').style.display='none'; }
+function modalOpen(){ return el('#modal').style.display==='flex'; }
+function checkWin(p){ if(totalHouses(p)>=WIN_HOUSES){ openModal('Zwycięstwo!', `${p.name} wygrywa!`, [{label:'Nowa gra', action:()=>{ closeModal(); newGame(); }}]); } }
+
+function newGame(){
+  owners={}; setOwners={};
+  players.forEach(p=>{ p.pos=0; p.stars=3; p.laps=0; p.owned={}; p.housesByGroup={}; });
+  renderBoard(); renderPlayers();
+  el('#log').innerHTML=''; log('Nowa gra! Każdy startuje z 3 ⭐. Przechodzisz przez START → +2 ⭐.');
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderBoard();
+  el('#rollBtn').onclick=rollDice;
+  el('#newBtn').onclick=newGame;
+  el('#music').onchange=(e)=>{ if(e.target.checked) startMusic(); else stopMusic(); };
+  document.body.addEventListener('touchstart', ()=>{ if(el('#music').checked) startMusic(); }, {once:true});
+  document.body.addEventListener('mousedown', ()=>{ if(el('#music').checked) startMusic(); }, {once:true});
+  // start overlay
+  buildSelect();
+  el('#startBtn').onclick=startGameFromSelection;
+});
+</script>
+</body></html>
