@@ -1,0 +1,249 @@
+
+<!doctype html><html lang="pl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Rodzinna Przygoda – v0.3</title>
+<style>
+:root{--ink:#1a1b20;--muted:#6a707e;--glass:#ffffffee;--border:#ebe7f4;--shadow:0 10px 24px rgba(0,0,0,.08), inset 0 1px 0 #fff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;color:var(--ink);background:linear-gradient(180deg,#fff,#f6f8ff 60%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Arial}
+.wrap{max-width:1150px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h1{margin:0;font-size:clamp(20px,3.6vw,34px)} .subtitle{color:var(--muted)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{border:0;border-radius:16px;padding:.8rem 1.1rem;font-weight:800;color:#fff;box-shadow:var(--shadow)}
+.btn.primary{background:linear-gradient(180deg,#8b5cf6,#6d28d9)}
+.btn.secondary{background:linear-gradient(180deg,#0ea5e9,#0369a1)}
+.btn.ghost{background:#fff;color:#111;box-shadow:0 0 0 2px #eee inset}
+.dice{width:68px;height:68px;background:#fff;border:2px solid #111;border-radius:16px;display:grid;place-items:center;font-size:2rem;box-shadow:var(--shadow)}
+.dice.shake{animation:shake .5s ease both}
+@keyframes shake{0%{transform:rotate(0)}25%{transform:rotate(-10deg)}50%{transform:rotate(10deg)}75%{transform:rotate(-6deg)}100%{transform:rotate(0)}}
+.banner{display:flex;gap:8px;align-items:center}
+.tag{background:#111;color:#fff;padding:3px 10px;border-radius:999px;font-size:.8rem;font-weight:800;box-shadow:var(--shadow)}
+.tag.green{background:#10b981}.tag.orange{background:#f59e0b}.tag.purple{background:#7c3aed}
+.badgebar{display:flex;gap:10px;flex-wrap:wrap}
+.badge{display:flex;gap:10px;align-items:center;background:var(--glass);border:1px solid var(--border);border-radius:18px;padding:10px 12px;box-shadow:var(--shadow)}
+.avatar{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:900}
+.avatar svg{display:block}
+.tableau{display:grid;grid-template-columns:420px 1fr;gap:12px}
+@media (max-width:980px){.tableau{grid-template-columns:1fr}}
+.ring-wrap{position:relative;background:var(--glass);border:1px solid var(--border);border-radius:22px;padding:12px;box-shadow:var(--shadow);min-height:720px}
+.center-panel{position:absolute;inset:20% 20%;background:linear-gradient(180deg,#fff,#f8f7ff);border:1px solid var(--border);border-radius:20px;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;text-align:center;padding:10px}
+.center-panel .title{font-weight:900}.center-panel .mini{color:var(--muted)}
+.ring{position:absolute;inset:12px;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,84px);gap:10px}
+.tile{position:relative;background:linear-gradient(180deg,#fff,#f9f9ff);border:2px solid #e7ddff;border-radius:16px;padding:8px;box-shadow:0 8px 18px rgba(0,0,0,.05), inset 0 1px 0 #fff;display:flex;flex-direction:column;justify-content:space-between}
+.tile .idx{position:absolute;top:6px;left:8px;font-size:.72rem;opacity:.5}
+.tile .label{font-size:.92rem;line-height:1.15;font-weight:700}
+.tile .group{height:8px;border-radius:6px;background:var(--pcolor)}
+.tile.start{background:linear-gradient(180deg,#fffbe6,#ffe082);border-color:#f2cc3f}
+.tile.chance{border-color:#93c5fd}.tile.challenge{border-color:#f0abfc}.tile.rest{border-color:#86efac}
+.tile:hover{transform:translateY(-2px);transition:.2s}
+.side{display:flex;flex-direction:column;gap:12px}
+.panel{background:var(--glass);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:var(--shadow)}
+.big{font-size:1.2rem}.mini{color:var(--muted)}.log{max-height:250px;overflow:auto;font-size:1rem}
+.piece{position:absolute;width:22px;height:22px;border-radius:50%;outline:2px solid #111;outline-offset:-2px;transform:translate(-50%,-50%);transition:transform .28s cubic-bezier(.2,.8,.2,1);z-index:5}
+.piece.small{width:18px;height:18px}.piece.bounce{animation:bounce .3s both}
+@keyframes bounce{0%{transform:translate(-50%,-60%) scale(.92)}100%{transform:translate(-50%,-50%) scale(1)}}
+.house{position:absolute;width:14px;height:14px;border-radius:4px;box-shadow:0 0 0 1px #111 inset}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.5);z-index:20}
+.modal .cardx{width:min(560px,96vw);background:#fff;border-radius:20px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.cardx .head{padding:12px 16px;background:linear-gradient(180deg,#f8f5ff,#fff);border-bottom:1px solid var(--border)}
+.cardx .body{padding:14px;min-height:90px}
+.cardx .actions{padding:12px 14px;display:flex;gap:8px;justify-content:flex-end}
+.flip{perspective:1000px}.flip .inner{position:relative;transform-style:preserve-3d;transition:transform .48s}
+.flip.show .inner{transform:rotateY(180deg)}
+.flip .front,.flip .back{backface-visibility:hidden;position:absolute;inset:0;padding:14px;border-radius:16px;border:2px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900}
+.flip .back{transform:rotateY(180deg);background:linear-gradient(180deg,#e0f2fe,#fff)}
+#startOverlay{position:fixed;inset:0;z-index:30;background:linear-gradient(180deg,#fff,#f6f8ff)}
+.start-card{max-width:860px;margin:8vh auto;background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:16px}
+.select-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:10px 0}
+.sel{display:flex;gap:10px;align-items:center;border:2px solid #eee;border-radius:16px;padding:12px;background:#fff;cursor:pointer;transition:.2s}
+.sel:hover{transform:translateY(-2px)}.sel.selected{border-color:#6d28d9;background:linear-gradient(180deg,#faf5ff,#fff)}
+.sel .avatar{width:48px;height:48px;border-radius:12px}
+</style></head><body>
+<div class="wrap">
+  <div class="top">
+    <div><h1>Rodzinna Przygoda – Budzyń</h1><div class="subtitle">Monopoly dla dzieci • lśniąca oprawa • szybkie tury</div></div>
+    <div class="controls">
+      <div class="dice" id="dice">🎲</div>
+      <button class="btn primary" id="rollBtn">Rzuć!</button>
+      <button class="btn secondary" id="newBtn">Nowa gra</button>
+      <button class="btn ghost" id="muteBtn">🔈</button>
+    </div>
+  </div>
+  <div class="badgebar" id="playersBar"></div>
+  <div class="tableau">
+    <div class="ring-wrap">
+      <div class="center-panel"><div class="title">BUDZYŃ</div><div class="mini">Zbierz zestawy i buduj domki</div></div>
+      <div id="ring" class="ring"></div>
+    </div>
+    <div class="side">
+      <div class="panel"><div class="banner"><span class="tag green">Tura</span><div class="big"><strong id="turnName">—</strong></div></div>
+        <div class="mini">Cel: <b>3 domki</b> lub najwięcej po <b>15 okr.</b> • START = +2 ⭐</div></div>
+      <div class="panel"><div class="banner"><span class="tag purple">Karty</span><div class="mini">Szansa/Wyzwanie</div></div>
+        <div class="flip" id="flip"><div class="inner"><div class="front">Dotknij, by odkryć</div><div class="back" id="flipBack">—</div></div></div></div>
+      <div class="panel"><div class="banner"><span class="tag orange">Dziennik</span></div><div class="log" id="log" aria-live="polite"></div></div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="modal"><div class="cardx"><div class="head"><strong id="mTitle">Akcja</strong></div><div class="body" id="mText"></div><div class="actions" id="mActions"></div></div></div>
+<div id="startOverlay"><div class="start-card"><div class="banner"><span class="tag" style="background:#ef4444">Start</span><div class="big">Wybierz graczy (2–4)</div></div>
+  <div class="select-grid" id="selectGrid"></div>
+  <div class="banner"><button class="btn primary" id="startBtn" disabled>Start!</button><div class="mini">Dostępni: Luca, Sylwia, Oli, Vicky, Leon, Nela</div></div>
+</div></div>
+
+<script>
+const PEOPLE = [{"name": "Luca", "color": "#1f2a44"}, {"name": "Sylwia", "color": "#ff7a00"}, {"name": "Oli", "color": "#e10600"}, {"name": "Vicky", "color": "#ff5fa2"}, {"name": "Leon", "color": "#8a8a8a"}, {"name": "Nela", "color": "#dc143c"}];
+const GROUPS = {"BUDZYN": {"label": "Budzyń", "color": "#b8865b", "props": ["Dom Rodzinny (Budzyn)", "Dom Sąsiadów (Miky)"]}, "NATURE_FUN": {"label": "Natura & Fun", "color": "#5fcf90", "props": ["Kryspinów – Jezioro", "Park Linowy", "Poletko poziomek"]}, "KRAKOW_FUN": {"label": "Kraków Fun", "color": "#e45858", "props": ["Kraków – Hotel Forum Area", "Park Jordana", "Park Decjusza"]}, "RESZTA_ZABAWY": {"label": "Reszta zabawy", "color": "#ffcc4d", "props": ["My Dream Sky (Rybna)", "Legendia (Katowice)"]}, "SPORT_EDU": {"label": "Sport & Edu", "color": "#4a90e2", "props": ["Basen w Piekarach", "Mała Akademia – Sala Pani Ania", "Mała Akademia – Sala Pani Isa"]}};
+const TILE_LIST = [{"type": "start", "label": "START – Budzyń"}, {"type": "prop", "group": "BUDZYN", "name": "Dom Rodzinny (Budzyn)"}, {"type": "chance", "label": "Szansa – Nonna Patrizia"}, {"type": "prop", "group": "BUDZYN", "name": "Dom Sąsiadów (Miky)"}, {"type": "challenge", "label": "Wyzwanie – Zio Diego"}, {"type": "prop", "group": "NATURE_FUN", "name": "Kryspinów – Jezioro"}, {"type": "prop", "group": "NATURE_FUN", "name": "Park Linowy"}, {"type": "rest", "label": "Odpoczynek – piknik"}, {"type": "prop", "group": "NATURE_FUN", "name": "Poletko poziomek"}, {"type": "chance", "label": "Szansa – Ciocia Kasia"}, {"type": "prop", "group": "KRAKOW_FUN", "name": "Kraków – Hotel Forum Area"}, {"type": "prop", "group": "KRAKOW_FUN", "name": "Park Jordana"}, {"type": "challenge", "label": "Wyzwanie – Dziadek Tosiek"}, {"type": "prop", "group": "KRAKOW_FUN", "name": "Park Decjusza"}, {"type": "rest", "label": "Odwiedziny u sąsiadów (Miky)"}, {"type": "prop", "group": "RESZTA_ZABAWY", "name": "My Dream Sky (Rybna)"}, {"type": "chance", "label": "Szansa – Babcia Urszula"}, {"type": "prop", "group": "RESZTA_ZABAWY", "name": "Legendia (Katowice)"}, {"type": "challenge", "label": "Wyzwanie – Nonno Mauro"}, {"type": "prop", "group": "SPORT_EDU", "name": "Basen w Piekarach"}, {"type": "prop", "group": "SPORT_EDU", "name": "Mała Akademia – Sala Pani Ania"}, {"type": "chance", "label": "Szansa – Ania"}, {"type": "prop", "group": "SPORT_EDU", "name": "Mała Akademia – Sala Pani Isa"}, {"type": "rest", "label": "Przerwa na lody"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}];
+const COST_BY_GROUP = {"BUDZYN": 2, "NATURE_FUN": 3, "KRAKOW_FUN": 3, "RESZTA_ZABAWY": 3, "SPORT_EDU": 3};
+const BASE_RENT=1, HOUSE_COST=2, RENT_WITH_SET=2, RENT_PER_HOUSE=1, WIN_HOUSES=3, MAX_LAPS=15;
+let players=[], turn=0, rolling=false, owners={}, setOwners={}, muted=false;
+let audioCtx=null, bgOsc=null, sClick=null, sCoin=null;
+const el=s=>document.querySelector(s);
+const ce=(t,c)=>{const n=document.createElement(t); if(c) n.className=c; return n;};
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const log=m=>{const d=el('#log'); const p=ce('div'); p.textContent=m; d.appendChild(p); d.scrollTop=d.scrollHeight; };
+function initAudio(){ if(audioCtx) return; audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  sClick=(f=600)=>{if(muted) return; const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type='square'; o.frequency.value=f; g.gain.value=0.04; o.connect(g).connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+.06);};
+  sCoin=()=>{if(muted) return; const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type='triangle'; o.frequency.value=880; g.gain.value=0.03; o.connect(g).connect(audioCtx.destination); o.start(); o.frequency.exponentialRampToValueAtTime(1400,audioCtx.currentTime+.12); o.stop(audioCtx.currentTime+.18);};
+}
+function startMusic(){ initAudio(); if(bgOsc||muted) return; const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type='sine'; o.frequency.value=210; g.gain.value=0.02; o.connect(g).connect(audioCtx.destination); o.start(); bgOsc={o,g}; }
+function stopMusic(){ if(bgOsc){try{bgOsc.o.stop();}catch(e){} bgOsc=null;} }
+function svgAvatar(bg, letter){
+  return `<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${bg}" stop-opacity=".95"/><stop offset="1" stop-color="${bg}" stop-opacity=".7"/></linearGradient></defs>
+    <rect rx="12" ry="12" width="40" height="40" fill="url(#g)"></rect>
+    <circle cx="20" cy="14" r="7" fill="#fff" opacity=".9"/><rect x="10" y="20" width="20" height="10" rx="5" fill="#fff" opacity=".9"/>
+    <text x="50%" y="62%" text-anchor="middle" font-size="14" font-weight="900" fill="#111" font-family="system-ui, -apple-system, Segoe UI, Roboto">${letter}</text>
+  </svg>`;
+}
+function renderPlayersBar(){
+  const bar=el('#playersBar'); bar.innerHTML='';
+  players.forEach(p=>{ const b=ce('div','badge'); const av=ce('div','avatar'); av.innerHTML=svgAvatar(p.color,p.name[0].toUpperCase()); const info=ce('div'); info.innerHTML=`<strong>${p.name}</strong> • ⭐ ${p.stars} • 🏠 ${totalHouses(p)} • okr. ${p.laps}`; b.append(av,info); bar.appendChild(b); });
+  el('#turnName').textContent=players[turn]?.name||'—';
+}
+function renderRing(){
+  const ring=el('#ring'); ring.innerHTML='';
+  // place tiles only on the ring (outer border of 8x8 grid)
+  for(let r=0;r<8;r++){ for(let c=0;c<8;c++){ const isEdge=(r===0||r===7||c===0||c===7); if(!isEdge){ const filler=ce('div'); ring.appendChild(filler); continue; }
+      const idx=ring.childElementCount; const t=TILE_LIST[idx]||{type:'chance',label:'Szansa – Niespodzianka'};
+      const d=ce('div','tile '+t.type); d.dataset.idx=idx;
+      d.style.setProperty('--pcolor', t.type==='prop' ? (GROUPS[t.group]?.color||'#ddd') : '#ddd');
+      d.innerHTML=`<div class="idx">${idx+1}</div><div class="label">${t.type==='prop'?t.name:t.label||t.type.toUpperCase()}</div><div class="group"></div>`;
+      if(idx===0) d.classList.add('start');
+      ring.appendChild(d);
+  } }
+}
+function ringTileCenter(idx){
+  const tiles=[...document.querySelectorAll('.ring .tile')]; const t=tiles[idx]; if(!t) return {x:0,y:0};
+  const r=t.getBoundingClientRect(); const sx=window.scrollX||document.documentElement.scrollLeft; const sy=window.scrollY||document.documentElement.scrollTop;
+  return {x:r.left+sx+r.width/2, y:r.top+sy+r.height/2};
+}
+function placePieces(){
+  document.querySelectorAll('.piece').forEach(x=>x.remove());
+  players.forEach(p=>{ const c=ringTileCenter(p.pos); const dot=ce('div','piece'); dot.style.background=p.color; if(p.name==='Nela') dot.classList.add('small'); dot.style.left=c.x+'px'; dot.style.top=c.y+'px'; document.body.appendChild(dot); requestAnimationFrame(()=>dot.classList.add('bounce')); });
+  document.querySelectorAll('.house').forEach(x=>x.remove());
+  Object.keys(GROUPS).forEach(grp=>{ players.forEach(p=>{ const h=p.housesByGroup?.[grp]||0; if(!h) return; const idxs=TILE_LIST.map((t,i)=>({t,i})).filter(x=>x.t.type==='prop'&&x.t.group===grp&&owners[x.i]===p.id).map(x=>x.i); if(!idxs.length) return; const tile=document.querySelector(`.ring .tile[data-idx="${idxs[0]}"]`); for(let i=0;i<h;i++){ const hEl=ce('div','house'); hEl.style.background=p.color; hEl.style.left='10px'; hEl.style.top=(10+i*16)+'px'; hEl.style.position='absolute'; tile.appendChild(hEl); } }); });
+}
+function buildSelect(){
+  const grid=el('#selectGrid'); grid.innerHTML='';
+  PEOPLE.forEach((p,i)=>{ const cell=ce('div','sel'); cell.dataset.idx=i; const av=ce('div','avatar'); av.innerHTML=svgAvatar(p.color,p.name[0].toUpperCase()); const label=ce('div'); label.innerHTML=`<strong>${p.name}</strong><div class="mini">Kolor: ${p.color}</div>`; cell.append(av,label); cell.onclick=()=>{ cell.classList.toggle('selected'); updateStartBtn(); }; grid.appendChild(cell); });
+}
+function updateStartBtn(){ const n=[...document.querySelectorAll('.sel.selected')].length; el('#startBtn').disabled=!(n>=2&&n<=4); }
+function startGameFromSelection(){
+  const sel=[...document.querySelectorAll('.sel.selected')].map(n=>+n.dataset.idx);
+  const chosen = sel.map(i=>PEOPLE[i]);
+  owners={}; setOwners={};
+  players = chosen.map((p,i)=>({id:i,name:p.name,color:p.color,pos:0,stars:3,laps:0,owned:{},housesByGroup:{}}));
+  turn=0; el('#startOverlay').style.display='none'; el('#log').innerHTML='';
+  renderPlayersBar(); renderRing(); placePieces(); log('Nowa gra! Każdy startuje z 3 ⭐. Przechodzisz przez START → +2 ⭐.');
+  startMusic();
+}
+function nextPlayer(){ turn=(turn+1)%players.length; renderPlayersBar(); }
+function animateMove(p,steps,cb){ if(steps<=0) return cb(); setTimeout(()=>{ p.pos=(p.pos+1)%TILE_LIST.length; renderPlayersBar(); placePieces(); animateMove(p,steps-1,cb); },240); }
+function rollDice(){ if(rolling) return; rolling=true; initAudio(); const d=el('#dice'); d.classList.add('shake'); let c=0; const t=setInterval(()=>{ d.textContent=rand(1,6); if(++c>9){ clearInterval(t); const v=rand(1,6); d.textContent=v; setTimeout(()=>{ d.classList.remove('shake'); applyRoll(v); rolling=false; },140); } },70); }
+function applyRoll(v){ const p=players[turn]; if(!p) return; log(`${p.name} rzuca ${v}.`); const prev=p.pos; animateMove(p,v,()=>{ if(prev>p.pos){ p.laps++; p.stars+=2; log(`${p.name} minął(a) START: +2 ⭐.`); } resolveTile(p,p.pos); }); }
+function propsInGroup(grp){ return TILE_LIST.map((t,i)=>({t,i})).filter(x=>x.t.type==='prop'&&x.t.group===grp); }
+function groupOwner(grp){ const props=propsInGroup(grp); if(!props.length) return null; const first=owners[props[0].i]; if(first==null) return null; for(const pr of props){ if(owners[pr.i]!==first) return null; } return first; }
+function totalHouses(p){ return Object.values(p.housesByGroup).reduce((a,b)=>a+b,0); }
+function canBuildHouse(p,grp){ return groupOwner(grp)===p.id; }
+function rentAmount(owner,grp){ let r=BASE_RENT; if(groupOwner(grp)===owner.id) r=RENT_WITH_SET; r+=(owner.housesByGroup[grp]||0)*RENT_PER_HOUSE; return Math.max(1,r); }
+function openModal(title,bodyHtml,actions){ const m=el('#modal'); el('#mTitle').textContent=title; el('#mText').innerHTML=bodyHtml; const box=el('#mActions'); box.innerHTML=''; actions.forEach(a=>{ const b=ce('button','btn '+(a.kind||'primary')); b.textContent=a.label; b.onclick=()=>a.action(); box.appendChild(b); }); m.style.display='flex'; }
+function closeModal(){ el('#modal').style.display='none'; }
+function showFlip(text){ const flip=el('#flip'); el('#flipBack').textContent=text; flip.classList.remove('show'); void flip.offsetWidth; flip.classList.add('show'); }
+function resolveTile(p,idx){ const t=TILE_LIST[idx]; if(t.type==='prop') onProperty(p,idx,t); else if(t.type==='chance') onChance(p,idx,t); else if(t.type==='challenge') onChallenge(p,idx,t); else if(t.type==='rest'){ showFlip('Chwila odpoczynku 🍦'); nextPlayer(); } else nextPlayer(); }
+
+function onProperty(p,idx,t){
+  const g=t.group; const cost=COST_BY_GROUP[g]||2; const ownedBy=owners[idx];
+  if(ownedBy==null){
+    openModal('Kupno', `<div class="big">${t.name}</div><div class="mini">Grupa: ${GROUPS[g].label} • Cena: ${cost} ⭐</div>`, [
+      {label:'Kupuję', kind:'primary', action:()=>{ if(p.stars>=cost){ p.stars-=cost; owners[idx]=p.id; p.owned[idx]=true; renderPlayersBar(); showFlip(\`Kupiono: ${t.name} 🎉\`); closeModal(); afterProperty(p,g); } else { showFlip('Za mało gwiazdek 😅'); closeModal(); nextPlayer(); } }},
+      {label:'Nie teraz', kind:'ghost', action:()=>{ closeModal(); nextPlayer(); }}
+    ]);
+  } else if(ownedBy===p.id){
+    if(canBuildHouse(p,g)){
+      openModal('Domek', `<div class="big">Masz cały zestaw (${GROUPS[g].label}).</div><div class="mini">Domek: ${HOUSE_COST} ⭐</div>`, [
+        {label:'Buduję', action:()=>{ if(p.stars>=HOUSE_COST){ p.stars-=HOUSE_COST; p.housesByGroup[g]=(p.housesByGroup[g]||0)+1; renderPlayersBar(); placePieces(); showFlip('Domek postawiony 🏠'); closeModal(); checkWin(p); nextPlayer(); } else { showFlip('Za mało gwiazdek'); closeModal(); nextPlayer(); } }},
+        {label:'Później', kind:'ghost', action:()=>{ closeModal(); nextPlayer(); }}
+      ]);
+    } else { nextPlayer(); }
+  } else {
+    const owner=players.find(x=>x.id===ownedBy);
+    const r=rentAmount(owner,g); const pay=Math.min(r,p.stars);
+    p.stars-=pay; owner.stars+=pay;
+    showFlip(`Czynsz ${pay} ⭐ dla ${owner.name}`);
+    renderPlayersBar(); nextPlayer();
+  }
+}
+function afterProperty(p,grp){
+  const own=groupOwner(grp);
+  if(own===p.id){ setOwners[grp]=p.id; log(`${p.name} posiada cały zestaw (${GROUPS[grp].props.join(', ')}).`); }
+  nextPlayer();
+}
+function onChance(p,idx,t){
+  const cards=[
+    {text:'Ciasto od babci: +1 ⭐', do:()=>{ p.stars+=1; }},
+    {text:'Zgubiłeś gwiazdkę: -1 ⭐', do:()=>{ p.stars=Math.max(0,p.stars-1); }},
+    {text:'Idź 2 pola do przodu', do:()=>{ moveBy(p,2); return; }},
+    {text:'Cofnij się o 1', do:()=>{ moveBy(p,-1); return; }},
+    {text:'Wszyscy +1 ⭐', do:()=>{ players.forEach(pl=>pl.stars++); }},
+  ];
+  const c=cards[Math.floor(Math.random()*cards.length)];
+  showFlip('SZANSA! 🎁'); setTimeout(()=>{ showFlip(c.text); const res=c.do(); if(res===undefined){ renderPlayersBar(); nextPlayer(); } },450);
+}
+function onChallenge(p,idx,t){
+  const need=5; let clicks=0; const time=3500; const start=Date.now();
+  openModal('Wyzwanie', `<div class="big">Kliknij ${need} razy w 3,5 sekundy</div><div class="mini">Nagroda: +1 ⭐</div>`, [
+    {label:'Klik!', action:()=>{ clicks++; el('#mText').innerHTML = `<div class="big">Kliknij ${need} razy w 3,5 sekundy</div><div>Postęp: <b>${clicks}/${need}</b></div>`; if(clicks>=need){ p.stars++; closeModal(); showFlip('Brawo! +1 ⭐'); renderPlayersBar(); nextPlayer(); } }},
+  ]);
+  const timer=setInterval(()=>{ if(!el('#modal')||el('#modal').style.display==='none'){ clearInterval(timer); return; } if(Date.now()-start>time){ clearInterval(timer); closeModal(); showFlip('Nie udało się 😿'); nextPlayer(); } },120);
+}
+function moveBy(p,delta){
+  const prev=p.pos; p.pos=(p.pos+delta)%TILE_LIST.length; if(p.pos<0) p.pos+=TILE_LIST.length;
+  renderPlayersBar(); placePieces(); resolveTile(p,p.pos);
+}
+function checkWin(p){
+  if(totalHouses(p)>=WIN_HOUSES){
+    openModal('Zwycięstwo! 🎉', `<div class="big">${p.name} wygrywa!</div>`, [
+      {label:'Nowa gra', action:()=>{ closeModal(); newGame(); }}
+    ]);
+  }
+}
+function newGame(){
+  owners={}; setOwners={};
+  players.forEach(p=>{ p.pos=0; p.stars=3; p.laps=0; p.owned={}; p.housesByGroup={}; });
+  renderRing(); renderPlayersBar(); placePieces();
+  el('#log').innerHTML=''; log('Nowa gra! Każdy startuje z 3 ⭐. Przechodzisz przez START → +2 ⭐.');
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderRing();
+  el('#rollBtn').onclick=rollDice;
+  el('#newBtn').onclick=newGame;
+  el('#muteBtn').onclick=()=>{ muted=!muted; el('#muteBtn').textContent= muted?'🔇':'🔈'; if(muted) stopMusic(); };
+  buildSelect();
+  el('#startBtn').onclick=startGameFromSelection;
+  document.body.addEventListener('touchstart', ()=>{ initAudio(); if(!muted) startMusic(); }, {once:true});
+  document.body.addEventListener('mousedown', ()=>{ initAudio(); if(!muted) startMusic(); }, {once:true});
+});
+</script>
+</body></html>
