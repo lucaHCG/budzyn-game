@@ -1,0 +1,456 @@
+
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Rodzinna Przygoda – v0.2</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+:root{
+  --bg1:#fef7ff; --bg2:#f5fbff;
+  --panel:#ffffffee; --ink:#1e1f24; --muted:#6b6e76;
+  --tile:#fff; --tile-b:#e8e3f3;
+  --accent:#8b5cf6; --accent2:#22c55e; --accent3:#f59e0b; --accent4:#ef4444;
+  --shadow:0 10px 20px rgba(0,0,0,.06), inset 0 1px 0 #fff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;color:var(--ink);
+  background: radial-gradient(1200px 700px at 15% -10%, var(--bg1), transparent),
+              radial-gradient(1100px 700px at 110% 10%, var(--bg2), transparent),
+              linear-gradient(180deg,#fff, #f6f8ff 60%);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,Arial;
+}
+.wrap{max-width:1100px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h1{font-size:clamp(20px,3.6vw,32px);margin:0;letter-spacing:.3px}
+.subtitle{color:var(--muted);font-size:.98rem;margin-top:2px}
+.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+button{
+  border:0;border-radius:14px;padding:.75rem 1rem;font-weight:700;
+  color:#fff;background:linear-gradient(180deg,#6d28d9,#4c1d95);
+  box-shadow:var(--shadow);font-size:1.05rem
+}
+button.secondary{background:linear-gradient(180deg,#0ea5e9,#0369a1)}
+button.ghost{background:#fff;color:#111;box-shadow:0 0 0 2px #eee inset}
+button:disabled{opacity:.6}
+.badgebar{display:flex;gap:8px;flex-wrap:wrap}
+.badge{
+  display:flex;align-items:center;gap:10px;background:var(--panel);
+  border:1px solid #ece8f7;border-radius:16px;padding:8px 12px;box-shadow:var(--shadow);
+}
+.avatar{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:900}
+.avatar svg{display:block}
+.stat{font-size:.92rem}
+.stat span{color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 380px;gap:12px}
+@media (max-width:920px){ .grid{grid-template-columns:1fr} }
+.boardwrap{background:var(--panel);border:1px solid #eee;border-radius:18px;padding:10px;box-shadow:var(--shadow)}
+.board{
+  display:grid;grid-template-columns:repeat(8,1fr);gap:8px;min-height:360px;
+}
+@media (max-width:760px){ .board{grid-template-columns:repeat(6,1fr)} }
+.tile{
+  position:relative;background:var(--tile);
+  border-radius:14px;border:2px solid var(--tile-b);
+  padding:8px;min-height:72px;display:flex;flex-direction:column;gap:4px;
+  box-shadow:0 6px 16px rgba(0,0,0,.04), inset 0 1px 0 #fff;
+  transform:translateZ(0);
+}
+.tile .idx{position:absolute;top:6px;left:8px;font-size:.7rem;opacity:.5}
+.tile .label{font-size:.9rem;line-height:1.1}
+.tile.prop::after{content:"";position:absolute;inset:auto 10px 10px 10px;height:8px;border-radius:6px;background:var(--pcolor)}
+.tile.start{background:linear-gradient(180deg,#fffbe6,#ffe082);border-color:#f2cc3f}
+.tile.chance{border-color:#93c5fd}
+.tile.challenge{border-color:#f0abfc}
+.tile.rest{border-color:#86efac}
+.piece{position:absolute;bottom:8px;right:8px;width:20px;height:20px;border-radius:50%;outline:2px solid #111;outline-offset:-2px;transform:translate(0,6px) scale(.9);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.piece.jump{transform:translate(0,-2px) scale(1.05)}
+.piece.small{width:16px;height:16px}
+.house{position:absolute;top:8px;right:8px;width:14px;height:14px;border-radius:4px;box-shadow:0 0 0 1px #111 inset}
+.side{
+  display:flex;flex-direction:column;gap:10px
+}
+.panel{background:var(--panel);border:1px solid #eee;border-radius:18px;padding:10px;box-shadow:var(--shadow)}
+.kit{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.card{
+  border-radius:16px;border:2px dashed #e9e2ff;padding:10px;background:#fff;min-height:88px;display:flex;gap:10px;align-items:center
+}
+.big{font-size:1.2rem}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dice{
+  width:64px;height:64px;border-radius:14px;background:#fff;display:grid;place-items:center;
+  border:2px solid #111;font-size:1.8rem;box-shadow:var(--shadow)
+}
+.dice.shake{animation:shake .5s ease both}
+@keyframes shake{0%{transform:rotate(0)}25%{transform:rotate(-10deg)}50%{transform:rotate(10deg)}75%{transform:rotate(-6deg)}100%{transform:rotate(0)}}
+.log{max-height:240px;overflow:auto;font-size:1rem}
+.mini{font-size:.9rem;color:var(--muted)}
+
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.5);z-index:20}
+.modal .cardx{width:min(560px,96vw);background:#fff;border-radius:20px;border:1px solid #eee;box-shadow:var(--shadow);overflow:hidden}
+.cardx .head{padding:12px 16px;background:linear-gradient(180deg,#f8f5ff,#fff);border-bottom:1px solid #eee}
+.cardx .body{padding:14px;min-height:90px}
+.cardx .actions{padding:12px 14px;display:flex;gap:8px;justify-content:flex-end}
+
+.flip{perspective:1000px}
+.flip .inner{position:relative;transform-style:preserve-3d;transition:transform .5s}
+.flip.show .inner{transform:rotateY(180deg)}
+.flip .front,.flip .back{
+  backface-visibility:hidden;position:absolute;inset:0;padding:12px;border-radius:16px;border:2px solid #eee;background:#fff;display:flex;align-items:center;justify-content:center
+}
+.flip .back{transform:rotateY(180deg);background:linear-gradient(180deg,#e0f2fe,#fff)}
+
+#startOverlay{position:fixed;inset:0;z-index:30;background:linear-gradient(180deg,#fff,#f6f8ff)}
+.start-card{max-width:820px;margin:10vh auto;background:#fff;border:1px solid #eee;border-radius:20px;box-shadow:var(--shadow);padding:16px}
+.select-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:10px 0}
+.sel{display:flex;gap:10px;align-items:center;border:2px solid #eee;border-radius:16px;padding:10px;background:#fff;cursor:pointer;transition:.2s}
+.sel:hover{transform:translateY(-2px)}
+.sel.selected{border-color:#6d28d9;background:linear-gradient(180deg,#faf5ff,#fff)}
+.sel .avatar{width:44px;height:44px;border-radius:12px}
+
+.banner{display:flex;gap:6px;align-items:center}
+.tag{padding:2px 8px;border-radius:999px;font-weight:700;color:#fff;font-size:.78rem;box-shadow:var(--shadow)}
+
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:40}
+.confetti i{position:absolute;width:10px;height:14px;opacity:.9}
+</style>
+</head>
+<body>
+<div class="confetti" id="confetti"></div>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Rodzinna Przygoda – Budzyń</h1>
+      <div class="subtitle">Monopoly dla dzieci • gwiazdki • domki • przygody</div>
+    </div>
+    <div class="controls">
+      <div class="dice" id="dice">🎲</div>
+      <button id="rollBtn">Rzuć!</button>
+      <button class="secondary" id="newBtn">Nowa gra</button>
+      <button class="ghost" id="muteBtn">🔈</button>
+    </div>
+  </div>
+
+  <div class="badgebar" id="playersBar"></div>
+
+  <div class="grid">
+    <div class="boardwrap">
+      <div class="board" id="board"></div>
+    </div>
+    <div class="side">
+      <div class="panel">
+        <div class="banner">
+          <span class="tag" style="background:#22c55e">Tura</span>
+          <div class="big"><strong id="turnName">—</strong></div>
+        </div>
+        <div class="mini">Cel: <b>3 domki</b> lub najwięcej po <b>15 okr.</b> • START = +2 ⭐</div>
+      </div>
+      <div class="panel">
+        <div class="banner"><span class="tag" style="background:#8b5cf6">Karty</span><div class="mini">Szansa/Wyzwanie</div></div>
+        <div class="flip" id="flip">
+          <div class="inner">
+            <div class="front">Kliknij, by odkryć kartę</div>
+            <div class="back" id="flipBack">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="banner"><span class="tag" style="background:#f59e0b">Dziennik</span></div>
+        <div class="log" id="log" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="cardx">
+    <div class="head"><strong id="mTitle">Akcja</strong></div>
+    <div class="body" id="mText"></div>
+    <div class="actions" id="mActions"></div>
+  </div>
+</div>
+
+<div id="startOverlay">
+  <div class="start-card">
+    <div class="banner"><span class="tag" style="background:#ef4444">Start</span><div class="big">Wybierz graczy (2–4)</div></div>
+    <div class="select-grid" id="selectGrid"></div>
+    <div class="row">
+      <button id="startBtn" disabled>Start!</button>
+      <div class="mini">Dostępni: Luca, Sylwia, Oli, Vicky, Leon, Nela</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PEOPLE = [{"name": "Luca", "color": "#1f2a44"}, {"name": "Sylwia", "color": "#ff7a00"}, {"name": "Oli", "color": "#e10600"}, {"name": "Vicky", "color": "#ff5fa2"}, {"name": "Leon", "color": "#8a8a8a"}, {"name": "Nela", "color": "#dc143c"}];
+const GROUPS = {"BUDZYN": {"label": "Budzyń", "color": "#c9a07d", "props": ["Dom Rodzinny (Budzyn)", "Dom Sąsiadów (Miky)"]}, "NATURE_FUN": {"label": "Natura & Fun", "color": "#65c18c", "props": ["Kryspinów – Jezioro", "Park Linowy", "Poletko poziomek"]}, "KRAKOW_FUN": {"label": "Kraków Fun", "color": "#e64a4a", "props": ["Kraków – Hotel Forum Area", "Park Jordana", "Park Decjusza"]}, "RESZTA_ZABAWY": {"label": "Reszta zabawy", "color": "#ffd24c", "props": ["My Dream Sky (Rybna)", "Legendia (Katowice)"]}, "SPORT_EDU": {"label": "Sport & Edu", "color": "#4a90e2", "props": ["Basen w Piekarach", "Mała Akademia – Sala Pani Ania", "Mała Akademia – Sala Pani Isa"]}};
+const TILE_LIST = [{"type": "start", "label": "START – Budzyń"}, {"type": "prop", "group": "BUDZYN", "name": "Dom Rodzinny (Budzyn)"}, {"type": "chance", "label": "Szansa – Nonna Patrizia"}, {"type": "prop", "group": "BUDZYN", "name": "Dom Sąsiadów (Miky)"}, {"type": "challenge", "label": "Wyzwanie – Zio Diego"}, {"type": "prop", "group": "NATURE_FUN", "name": "Kryspinów – Jezioro"}, {"type": "prop", "group": "NATURE_FUN", "name": "Park Linowy"}, {"type": "rest", "label": "Odpoczynek – piknik"}, {"type": "prop", "group": "NATURE_FUN", "name": "Poletko poziomek"}, {"type": "chance", "label": "Szansa – Ciocia Kasia"}, {"type": "prop", "group": "KRAKOW_FUN", "name": "Kraków – Hotel Forum Area"}, {"type": "prop", "group": "KRAKOW_FUN", "name": "Park Jordana"}, {"type": "challenge", "label": "Wyzwanie – Dziadek Tosiek"}, {"type": "prop", "group": "KRAKOW_FUN", "name": "Park Decjusza"}, {"type": "rest", "label": "Odwiedziny u sąsiadów (Miky)"}, {"type": "prop", "group": "RESZTA_ZABAWY", "name": "My Dream Sky (Rybna)"}, {"type": "chance", "label": "Szansa – Babcia Urszula"}, {"type": "prop", "group": "RESZTA_ZABAWY", "name": "Legendia (Katowice)"}, {"type": "challenge", "label": "Wyzwanie – Nonno Mauro"}, {"type": "prop", "group": "SPORT_EDU", "name": "Basen w Piekarach"}, {"type": "prop", "group": "SPORT_EDU", "name": "Mała Akademia – Sala Pani Ania"}, {"type": "chance", "label": "Szansa – Ania"}, {"type": "prop", "group": "SPORT_EDU", "name": "Mała Akademia – Sala Pani Isa"}, {"type": "rest", "label": "Przerwa na lody"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}];
+const COST_BY_GROUP = {"BUDZYN": 2, "NATURE_FUN": 3, "KRAKOW_FUN": 3, "RESZTA_ZABAWY": 3, "SPORT_EDU": 3};
+
+const BASE_RENT = 1, HOUSE_COST = 2, RENT_WITH_SET = 2, RENT_PER_HOUSE = 1;
+const WIN_HOUSES = 3, MAX_LAPS = 15;
+
+let players=[], turn=0, rolling=false, owners={}, setOwners={}, muted=false;
+let audioCtx=null, bgOsc=null, sClick=null, sCoin=null;
+
+const el=s=>document.querySelector(s);
+const ce=(t,c)=>{const n=document.createElement(t); if(c) n.className=c; return n;};
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const log = (msg)=>{ const d=el('#log'); const p=ce('div'); p.textContent=msg; d.appendChild(p); d.scrollTop=d.scrollHeight; };
+
+function initAudio(){
+  if(audioCtx) return;
+  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  // SFX
+  sClick = (freq=600)=>{ if(muted) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.value=freq; g.gain.value=0.04; o.connect(g).connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+0.06); };
+  sCoin  = ()=>{ if(muted) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='triangle'; o.frequency.value=880; g.gain.value=0.03; o.connect(g).connect(audioCtx.destination); o.start(); o.frequency.exponentialRampToValueAtTime(1400,audioCtx.currentTime+.12); o.stop(audioCtx.currentTime+.18); };
+}
+function startMusic(){ initAudio(); if(bgOsc||muted) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.value=210; g.gain.value=0.02; o.connect(g).connect(audioCtx.destination); o.start(); bgOsc={o,g}; }
+function stopMusic(){ if(bgOsc){ try{bgOsc.o.stop();}catch(e){} bgOsc=null; }}
+
+function svgAvatar(bg, letter){
+  return `<svg width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${bg}" stop-opacity=".95"/><stop offset="1" stop-color="${bg}" stop-opacity=".7"/></linearGradient></defs>
+    <rect rx="12" ry="12" width="38" height="38" fill="url(#g)"></rect>
+    <circle cx="19" cy="13" r="7" fill="#fff" opacity=".8"/><rect x="9" y="19" width="20" height="10" rx="5" fill="#fff" opacity=".8"/>
+    <text x="50%" y="60%" text-anchor="middle" font-size="14" font-weight="900" fill="#111" font-family="system-ui, -apple-system, Segoe UI, Roboto">${letter}</text>
+  </svg>`;
+}
+
+function renderPlayersBar(){
+  const bar=el('#playersBar'); bar.innerHTML='';
+  players.forEach(p=>{
+    const b=ce('div','badge');
+    const av=ce('div','avatar'); av.innerHTML=svgAvatar(p.color, p.name[0].toUpperCase());
+    const info=ce('div','stat');
+    info.innerHTML = `<strong>${p.name}</strong> <span>• ⭐ ${p.stars} • 🏠 ${totalHouses(p)} • okr. ${p.laps}</span>`;
+    b.append(av,info); bar.appendChild(b);
+  });
+  el('#turnName').textContent = players[turn]?.name||'—';
+}
+
+function colorForGroup(g){ return GROUPS[g]?.color || '#ddd'; }
+
+function renderBoard(){
+  const board=el('#board'); board.innerHTML='';
+  TILE_LIST.forEach((t,idx)=>{
+    const d=ce('div','tile '+t.type);
+    d.style.setProperty('--pcolor', t.type==='prop' ? colorForGroup(t.group) : '#ddd');
+    d.innerHTML = `<div class="idx">${idx+1}</div>
+      <div class="label">${t.type==='prop'?t.name:t.label||t.type.toUpperCase()}</div>`;
+    d.dataset.idx=idx;
+    if(idx===0) d.classList.add('start');
+    board.appendChild(d);
+  });
+  placePieces();
+}
+
+function placePieces(){
+  document.querySelectorAll('.tile .piece').forEach(x=>x.remove());
+  const tiles=[...document.querySelectorAll('.tile')];
+  players.forEach((p)=>{
+    const slot=tiles[p.pos];
+    const dot=ce('div','piece'); dot.style.background=p.color;
+    if(p.name==='Nela') dot.classList.add('small');
+    slot.appendChild(dot);
+    requestAnimationFrame(()=>{ dot.classList.add('jump'); setTimeout(()=>dot.classList.remove('jump'),260); });
+  });
+  // houses
+  tiles.forEach(t=>t.querySelectorAll('.house').forEach(x=>x.remove()));
+  Object.keys(GROUPS).forEach(grp=>{
+    players.forEach(p=>{
+      const h=p.housesByGroup[grp]||0;
+      if(!h) return;
+      // find first owned tile in the group
+      const idxs=TILE_LIST.map((t,i)=>({t,i})).filter(x=>x.t.type==='prop'&&x.t.group===grp&&owners[x.i]===p.id).map(x=>x.i);
+      if(!idxs.length) return;
+      const tile=tiles[idxs[0]];
+      for(let i=0;i<h;i++){ const hEl=ce('div','house'); hEl.style.background=p.color; hEl.style.top=(8+i*16)+'px'; tile.appendChild(hEl); }
+    });
+  });
+}
+
+function buildSelect(){
+  const grid=el('#selectGrid'); grid.innerHTML='';
+  PEOPLE.forEach((p,i)=>{
+    const cell=ce('div','sel'); cell.dataset.idx=i;
+    const av=ce('div','avatar'); av.innerHTML=svgAvatar(p.color, p.name[0].toUpperCase());
+    const label=ce('div'); label.innerHTML=`<strong>${p.name}</strong><div class="mini">Kolor: ${p.color}</div>`;
+    cell.append(av,label);
+    cell.onclick=()=>{ cell.classList.toggle('selected'); updateStartBtn(); sClick(); };
+    grid.appendChild(cell);
+  });
+}
+function updateStartBtn(){ const n=[...document.querySelectorAll('.sel.selected')].length; el('#startBtn').disabled=!(n>=2&&n<=4); }
+function startGameFromSelection(){
+  const sel=[...document.querySelectorAll('.sel.selected')].map(n=>+n.dataset.idx);
+  const chosen=sel.map(i=>PEOPLE[i]);
+  owners={}; setOwners={};
+  players = chosen.map((p,i)=>({id:i,name:p.name,color:p.color,pos:0,stars:3,laps:0,owned:{},housesByGroup:{}}));
+  turn=0; el('#startOverlay').style.display='none'; el('#log').innerHTML='';
+  renderPlayersBar(); renderBoard();
+  log('Nowa gra! Każdy startuje z 3 ⭐. Przechodzisz przez START → +2 ⭐.');
+  startMusic();
+}
+
+function nextPlayer(){ turn=(turn+1)%players.length; renderPlayersBar(); }
+
+function rollDice(){
+  if(rolling) return; rolling=true; initAudio();
+  const d=el('#dice'); d.classList.add('shake'); sClick(520);
+  let c=0;
+  const t=setInterval(()=>{ d.textContent=rand(1,6); if(++c>9){ clearInterval(t); const v=rand(1,6); d.textContent=v; setTimeout(()=>{ d.classList.remove('shake'); applyRoll(v); rolling=false; },150);} },70);
+}
+
+function applyRoll(v){
+  const p=players[turn]; if(!p) return;
+  log(`${p.name} rzuca ${v}.`);
+  const prev=p.pos; p.pos=(p.pos+v)%TILE_LIST.length;
+  if(prev>p.pos){ p.laps++; p.stars+=2; sCoin(); log(`${p.name} minął(a) START: +2 ⭐.`); }
+  renderPlayersBar(); placePieces();
+  setTimeout(()=>resolveTile(p,p.pos), 320); // small timing for animation
+}
+
+function propsInGroup(grp){ return TILE_LIST.map((t,i)=>({t,i})).filter(x=>x.t.type==='prop'&&x.t.group===grp); }
+function groupOwner(grp){
+  const props=propsInGroup(grp); if(!props.length) return null;
+  const first=owners[props[0].i]; if(first==null) return null;
+  for(const pr of props){ if(owners[pr.i]!==first) return null; } return first;
+}
+function totalHouses(p){ return Object.values(p.housesByGroup).reduce((a,b)=>a+b,0); }
+function canBuildHouse(p,grp){ return groupOwner(grp)===p.id; }
+function rentAmount(owner,grp){
+  let r=BASE_RENT; if(groupOwner(grp)===owner.id) r=RENT_WITH_SET;
+  r += (owner.housesByGroup[grp]||0)*RENT_PER_HOUSE;
+  return Math.max(1,r);
+}
+
+// Modal helpers
+function openModal(title, bodyHtml, actions){
+  const m=el('#modal'); el('#mTitle').textContent=title; el('#mText').innerHTML=bodyHtml;
+  const box=el('#mActions'); box.innerHTML='';
+  actions.forEach(a=>{ const b=ce('button'); b.textContent=a.label; if(a.kind) b.classList.add(a.kind); b.onclick=()=>{ a.action(); }; box.appendChild(b); });
+  m.style.display='flex';
+}
+function closeModal(){ el('#modal').style.display='none'; }
+
+// Flip card
+function showFlip(text){
+  const flip=el('#flip'); el('#flipBack').textContent=text;
+  flip.classList.remove('show'); void flip.offsetWidth; // reflow
+  flip.classList.add('show');
+}
+
+// Confetti
+function confettiBurst(){
+  const box=el('#confetti'); box.innerHTML='';
+  const colors=['#f87171','#34d399','#60a5fa','#fbbf24','#f472b6','#a78bfa'];
+  for(let i=0;i<60;i++){
+    const e=ce('i');
+    const c=colors[i%colors.length];
+    e.style.background=c;
+    e.style.left=Math.random()*100+'%';
+    e.style.top='-10px';
+    e.animate([
+      {transform:`translateY(0) rotate(0deg)`, opacity:1},
+      {transform:`translateY(${window.innerHeight+80}px) rotate(${Math.random()*720-360}deg)`, opacity:1}
+    ],{duration:1200+Math.random()*800, easing:'cubic-bezier(.2,.8,.2,1)', fill:'forwards'});
+    box.appendChild(e);
+  }
+}
+
+function resolveTile(p,idx){
+  const t=TILE_LIST[idx];
+  if(t.type==='prop') onProperty(p,idx,t);
+  else if(t.type==='chance') onChance(p,idx,t);
+  else if(t.type==='challenge') onChallenge(p,idx,t);
+  else if(t.type==='rest') { showFlip('Chwila odpoczynku 🍧'); nextPlayer(); }
+  else nextPlayer();
+}
+
+function onProperty(p,idx,t){
+  const g=t.group; const cost=COST_BY_GROUP[g]||2;
+  const ownedBy=owners[idx];
+  if(ownedBy==null){
+    openModal('Kupno', `<div class="big">${t.name}</div><div class="mini">Cena: ${cost} ⭐</div>`, [
+      {label:'Kupuję', kind:'', action:()=>{ if(p.stars>=cost){ p.stars-=cost; owners[idx]=p.id; p.owned[idx]=true; renderPlayersBar(); showFlip(`Kupiono: ${t.name} 🎉`); sCoin(); closeModal(); afterProperty(p,g); } else { showFlip('Za mało gwiazdek 😅'); closeModal(); nextPlayer(); } }},
+      {label:'Nie teraz', kind:'ghost', action:()=>{ closeModal(); nextPlayer(); }}
+    ]);
+  } else if(ownedBy===p.id){
+    if(canBuildHouse(p,g)){
+      openModal('Budowa domku', `<div class="big">Masz cały zestaw (${GROUPS[g].label}).</div><div class="mini">Domek: ${HOUSE_COST} ⭐</div>`, [
+        {label:'Buduję', action:()=>{ if(p.stars>=HOUSE_COST){ p.stars-=HOUSE_COST; p.housesByGroup[g]=(p.housesByGroup[g]||0)+1; renderPlayersBar(); placePieces(); showFlip('Domek postawiony 🏠'); sCoin(); closeModal(); checkWin(p); nextPlayer(); } else { showFlip('Za mało gwiazdek'); closeModal(); nextPlayer(); } }},
+        {label:'Później', kind:'ghost', action:()=>{ closeModal(); nextPlayer(); }}
+      ]);
+    } else { nextPlayer(); }
+  } else {
+    const owner=players.find(x=>x.id===ownedBy);
+    const r=rentAmount(owner,g); const pay=Math.min(r,p.stars);
+    p.stars-=pay; owner.stars+=pay;
+    showFlip(`Czynsz ${pay} ⭐ dla ${owner.name}`);
+    renderPlayersBar(); nextPlayer();
+  }
+}
+function afterProperty(p,grp){
+  const own=groupOwner(grp);
+  if(own===p.id){ setOwners[grp]=p.id; log(`${p.name} posiada cały zestaw (${GROUPS[grp].props.join(', ')}).`); }
+  nextPlayer();
+}
+
+function onChance(p,idx,t){
+  const cards=[
+    {text:'Ciasto od babci: +1 ⭐', do:()=>{ p.stars+=1; sCoin(); }},
+    {text:'Zgubiłeś gwiazdkę: -1 ⭐', do:()=>{ p.stars=Math.max(0,p.stars-1); }},
+    {text:'Idź 2 pola do przodu', do:()=>{ moveBy(p,2); return; }},
+    {text:'Cofnij się o 1', do:()=>{ moveBy(p,-1); return; }},
+    {text:'Wszyscy +1 ⭐', do:()=>{ players.forEach(pl=>pl.stars++); sCoin(); }},
+  ];
+  const c=cards[Math.floor(Math.random()*cards.length)];
+  showFlip('SZANSA! 🎁'); setTimeout(()=>{ showFlip(c.text); const res=c.do(); if(res===undefined){ renderPlayersBar(); nextPlayer(); } },450);
+}
+
+function onChallenge(p,idx,t){
+  const need=5; let clicks=0; const time=3500; const start=Date.now();
+  openModal('Wyzwanie', `<div class="big">Kliknij ${need} razy w 3,5 sekundy</div><div class="mini">Nagroda: +1 ⭐</div>`, [
+    {label:'Klik!', action:()=>{ clicks++; sClick(700); el('#mText').innerHTML = `<div class="big">Kliknij ${need} razy w 3,5 sekundy</div><div>Postęp: <b>${clicks}/${need}</b></div>`; if(clicks>=need){ p.stars++; sCoin(); closeModal(); showFlip('Brawo! +1 ⭐'); renderPlayersBar(); nextPlayer(); } }},
+  ]);
+  const timer=setInterval(()=>{ if(!el('#modal')||el('#modal').style.display==='none'){ clearInterval(timer); return; } if(Date.now()-start>time){ clearInterval(timer); closeModal(); showFlip('Nie udało się 😿'); nextPlayer(); } },120);
+}
+
+function moveBy(p,delta){
+  const prev=p.pos; p.pos=(p.pos+delta)%TILE_LIST.length; if(p.pos<0) p.pos+=TILE_LIST.length;
+  renderPlayersBar(); placePieces(); resolveTile(p,p.pos);
+}
+
+function checkWin(p){
+  if(totalHouses(p)>=WIN_HOUSES){
+    confettiBurst();
+    openModal('Zwycięstwo! 🎉', `<div class="big">${p.name} wygrywa!</div>`, [
+      {label:'Nowa gra', action:()=>{ closeModal(); newGame(); }}
+    ]);
+  }
+}
+
+function newGame(){
+  owners={}; setOwners={};
+  players.forEach(p=>{ p.pos=0; p.stars=3; p.laps=0; p.owned={}; p.housesByGroup={}; });
+  renderBoard(); renderPlayersBar();
+  el('#log').innerHTML=''; log('Nowa gra! Każdy startuje z 3 ⭐. Przechodzisz przez START → +2 ⭐.');
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderBoard();
+  el('#rollBtn').onclick=rollDice;
+  el('#newBtn').onclick=newGame;
+  el('#muteBtn').onclick=()=>{ muted=!muted; el('#muteBtn').textContent = muted?'🔇':'🔈'; if(muted) stopMusic(); };
+  buildSelect();
+  el('#startBtn').onclick=startGameFromSelection;
+  document.body.addEventListener('touchstart', ()=>{ initAudio(); if(!muted) startMusic(); }, {once:true});
+  document.body.addEventListener('mousedown', ()=>{ initAudio(); if(!muted) startMusic(); }, {once:true});
+});
+</script>
+</body>
+</html>
