@@ -1,0 +1,117 @@
+
+<!doctype html><html lang="pl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Budzyn – Gra</title>
+<link rel="stylesheet" href="css/style.css">
+</head><body>
+<div class="wrap">
+  <div class="row">
+    <div class="dice3d"><div class="cube" id="cube">
+      <div class="face one">1</div>
+      <div class="face two">2</div>
+      <div class="face three">3</div>
+      <div class="face four">4</div>
+      <div class="face five">5</div>
+      <div class="face six">6</div>
+    </div></div>
+    <button class="btn primary" id="rollBtn">Rzuć!</button>
+    <button class="btn ghost" onclick="location.href='index.html'">← Menu</button>
+  </div>
+
+  <div class="panel"><div class="badgebar" id="playersBar"></div></div>
+
+  <div class="boardwrap">
+    <div class="center-panel"><div><b>BUDZYŃ</b></div><div class="small">Zbierz zestawy i buduj domki</div></div>
+    <div id="ring" class="ring"></div>
+  </div>
+
+  <div class="panel"><div>Tura: <b id="turnName">—</b></div>
+    <div class="small">Cel: 3 domki lub najwięcej po 15 okr.</div></div>
+  <div class="panel"><b>Dziennik</b><div id="log" class="small" style="max-height:240px;overflow:auto"></div></div>
+</div>
+
+<div class="npc" id="npc">
+  <div class="thumb"><img id="npcImg" alt=""></div>
+  <div><div><b id="npcName">—</b></div><div class="small" id="npcLine">—</div></div>
+</div>
+
+<script>
+const PEOPLE = [{"key": "luca", "name": "Luca", "color": "#1f2a44"}, {"key": "sylwia", "name": "Sylwia", "color": "#ff7a00"}, {"key": "oli", "name": "Oli", "color": "#e10600"}, {"key": "vicky", "name": "Vicky", "color": "#ff5fa2"}, {"key": "leon", "name": "Leon", "color": "#8a8a8a"}, {"key": "nela", "name": "Nela", "color": "#dc143c"}];
+const GROUPS = {"BUDZYN": {"label": "Budzyń", "color": "#b8865b", "props": ["Dom Rodzinny (Budzyn)", "Dom Sąsiadów (Miky)"]}, "NATURE_FUN": {"label": "Natura & Fun", "color": "#5fcf90", "props": ["Kryspinów – Jezioro", "Park Linowy", "Poletko poziomek"]}, "KRAKOW_FUN": {"label": "Kraków Fun", "color": "#e45858", "props": ["Kraków – Hotel Forum Area", "Park Jordana", "Park Decjusza"]}, "RESZTA_ZABAWY": {"label": "Reszta zabawy", "color": "#ffcc4d", "props": ["My Dream Sky (Rybna)", "Legendia (Katowice)"]}, "SPORT_EDU": {"label": "Sport & Edu", "color": "#4a90e2", "props": ["Basen w Piekarach", "Mała Akademia – Sala Pani Ania", "Mała Akademia – Sala Pani Isa"]}};
+const TILES = [{"type": "start", "label": "START – Budzyń"}, {"type": "prop", "group": "BUDZYN", "name": "Dom Rodzinny (Budzyn)"}, {"type": "chance", "label": "Szansa – Nonna Patrizia", "npc": "nonna_patrizia"}, {"type": "prop", "group": "BUDZYN", "name": "Dom Sąsiadów (Miky)"}, {"type": "challenge", "label": "Wyzwanie – Zio Diego", "npc": "zio_diego"}, {"type": "prop", "group": "NATURE_FUN", "name": "Kryspinów – Jezioro"}, {"type": "prop", "group": "NATURE_FUN", "name": "Park Linowy"}, {"type": "rest", "label": "Odpoczynek – piknik"}, {"type": "prop", "group": "NATURE_FUN", "name": "Poletko poziomek"}, {"type": "chance", "label": "Szansa – Ciocia Kasia", "npc": "ciocia_kasia"}, {"type": "prop", "group": "KRAKOW_FUN", "name": "Kraków – Hotel Forum Area"}, {"type": "prop", "group": "KRAKOW_FUN", "name": "Park Jordana"}, {"type": "challenge", "label": "Wyzwanie – Dziadek Tosiek", "npc": "dziadek_tosiek"}, {"type": "prop", "group": "KRAKOW_FUN", "name": "Park Decjusza"}, {"type": "rest", "label": "Odwiedziny u sąsiadów (Miky)"}, {"type": "prop", "group": "RESZTA_ZABAWY", "name": "My Dream Sky (Rybna)"}, {"type": "chance", "label": "Szansa – Babcia Urszula", "npc": "nonna_patrizia"}, {"type": "prop", "group": "RESZTA_ZABAWY", "name": "Legendia (Katowice)"}, {"type": "challenge", "label": "Wyzwanie – Nonno Mauro", "npc": "nonno_mauro"}, {"type": "prop", "group": "SPORT_EDU", "name": "Basen w Piekarach"}, {"type": "prop", "group": "SPORT_EDU", "name": "Mała Akademia – Sala Pani Ania"}, {"type": "chance", "label": "Szansa – Ania", "npc": "ania"}, {"type": "prop", "group": "SPORT_EDU", "name": "Mała Akademia – Sala Pani Isa"}, {"type": "rest", "label": "Przerwa na lody"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}, {"type": "chance", "label": "Szansa – Niespodzianka"}];
+const COSTS = {"BUDZYN": 2, "NATURE_FUN": 3, "KRAKOW_FUN": 3, "RESZTA_ZABAWY": 3, "SPORT_EDU": 3};
+const BASE_RENT=1, HOUSE_COST=2, RENT_WITH_SET=2, RENT_PER_HOUSE=1, WIN_HOUSES=3, MAX_LAPS=15;
+
+let selKeys = JSON.parse(localStorage.getItem('players')||'[]');
+if(selKeys.length===0) location.href='index.html';
+let players = PEOPLE.filter(p=>selKeys.includes(p.key)).map((p,i)=>({id:i,key:p.key,name:p.name,color:p.color,pos:0,stars:3,laps:0,owned:{},housesByGroup:{}}));
+let turn=0, rolling=false, owners={};
+
+function log(m){ const d=document.getElementById('log'); const p=document.createElement('div'); p.textContent=m; d.appendChild(p); d.scrollTop=d.scrollHeight; }
+
+function ringTileCenter(idx){
+  const tiles=[...document.querySelectorAll('.ring .tile')]; const t=tiles[idx]; if(!t) return {x:0,y:0};
+  const r=t.getBoundingClientRect(); const sx=window.scrollX||document.documentElement.scrollLeft; const sy=window.scrollY||document.documentElement.scrollTop;
+  return {x:r.left+sx+r.width/2, y:r.top+sy+r.height/2};
+}
+
+function renderRing(){
+  const ring=document.getElementById('ring'); ring.innerHTML='';
+  for(let r=0;r<8;r++){ for(let c=0;c<8;c++){ const isEdge=(r===0||r===7||c===0||c===7); const d=document.createElement('div'); if(!isEdge){ ring.appendChild(d); continue; }
+    const idx=ring.childElementCount; const t=TILES[idx]||{type:'chance',label:'Szansa – Niespodzianka'};
+    d.className='tile '+t.type; d.dataset.idx=idx; d.style.setProperty('--pcolor', t.type==='prop' ? (GROUPS[t.group]?.color||'#ddd') : '#ddd');
+    d.innerHTML=`<div class="idx">${idx+1}</div><div class="label">${t.type==='prop'?t.name:t.label}</div><div class="group"></div>`;
+    if(idx===0) d.classList.add('start');
+    ring.appendChild(d);
+  } }
+}
+
+function renderBar(){
+  const bar=document.getElementById('playersBar'); bar.innerHTML='';
+  players.forEach(p=>{ const b=document.createElement('div'); b.className='badge'; const av=document.createElement('div'); av.className='avatar'; const img=new Image(); img.src='assets/avatars/'+p.key+'.png'; av.appendChild(img); const st=document.createElement('div'); st.innerHTML=`<b>${p.name}</b> <span class="small">• ⭐ ${p.stars} • 🏠 ${(Object.values(p.housesByGroup).reduce((a,b)=>a+b,0)||0)} • okr. ${p.laps}</span>`; b.append(av,st); bar.appendChild(b); });
+  document.getElementById('turnName').textContent=players[turn]?.name||'—';
+}
+
+function placePieces(){
+  document.querySelectorAll('.piece').forEach(x=>x.remove());
+  players.forEach(p=>{ const c=ringTileCenter(p.pos); const dot=document.createElement('div'); dot.className='piece'; if(p.key==='nela') dot.classList.add('small'); dot.style.background=p.color; dot.style.left=c.x+'px'; dot.style.top=c.y+'px'; document.body.appendChild(dot); });
+}
+
+function rotateCubeTo(n){ const cube=document.getElementById('cube'); const faces={1:'rotateX(0deg) rotateY(0deg)',2:'rotateY(-90deg)',3:'rotateY(180deg)',4:'rotateY(90deg)',5:'rotateX(-90deg)',6:'rotateX(90deg)'}; cube.style.transform = faces[n] + ' rotateZ(360deg)'; }
+
+function animateMove(p,steps,cb){ if(steps<=0) return cb(); setTimeout(()=>{ p.pos=(p.pos+1)%TILES.length; renderBar(); placePieces(); animateMove(p,steps-1,cb); }, 260); }
+function applyRoll(v){ const p=players[turn]; if(!p) return; log(`${p.name} rzuca ${v}.`); const prev=p.pos; animateMove(p,v,()=>{ if(prev>p.pos){ p.laps++; p.stars+=2; log(`${p.name} minął(a) START: +2 ⭐.`); } resolveTile(p,p.pos); }); }
+
+function propsInGroup(grp){ return TILES.map((t,i)=>({t,i})).filter(x=>x.t.type==='prop'&&x.t.group===grp); }
+function groupOwner(grp){ const props=propsInGroup(grp); if(!props.length) return null; const first=owners[props[0].i]; if(first==null) return null; for(const pr of props){ if(owners[pr.i]!==first) return null; } return first; }
+function rentAmount(owner,grp){ let r=1; if(groupOwner(grp)===owner.id) r=2; r+=(owner.housesByGroup[grp]||0)*1; return Math.max(1,r); }
+
+function showNPC(key,line){ const box=document.getElementById('npc'); const img=document.getElementById('npcImg'); const name=document.getElementById('npcName'); const text=document.getElementById('npcLine'); name.textContent=key.replace('_',' ').toUpperCase(); text.textContent=line; img.src='assets/npc/'+key+'.png'; box.style.display='flex'; setTimeout(()=>{ box.style.display='none'; }, 4000); }
+
+function openModal(title,html,actions){ const m=document.createElement('div'); m.className='modal'; m.style.display='flex'; m.innerHTML=`<div class="cardx"><div class="head"><strong>${title}</strong></div><div class="body">${html}</div><div class="actions" id="acts"></div></div>`; document.body.appendChild(m); const acts=m.querySelector('#acts'); actions.forEach(a=>{ const b=document.createElement('button'); b.className='btn '+(a.kind||'primary'); b.textContent=a.label; b.onclick=()=>{ a.action(); document.body.removeChild(m); }; acts.appendChild(b); }); }
+
+function onProperty(p,idx,t){ const g=t.group; const cost=COSTS[g]||2; const ownedBy=owners[idx];
+  if(ownedBy==null){ openModal('Kupno', `<div class="big">${t.name}</div><div class="small">Grupa: ${GROUPS[g].label} • Cena: ${cost} ⭐</div>`, [
+      {label:'Kupuję', action:()=>{ if(p.stars>=cost){ p.stars-=cost; owners[idx]=p.id; renderBar(); } }},
+      {label:'Nie teraz', kind:'ghost', action:()=>{}}
+  ]); nextPlayer(); }
+  else if(ownedBy===p.id){ if(groupOwner(g)===p.id){ openModal('Domek', `<div class="small">Domek: 2 ⭐</div>`, [
+      {label:'Buduję', action:()=>{ if(p.stars>=2){ p.stars-=2; p.housesByGroup[g]=(p.housesByGroup[g]||0)+1; renderBar(); } }},
+      {label:'Później', kind:'ghost', action:()=>{}}
+  ]); } nextPlayer(); }
+  else { const owner=players.find(x=>x.id===ownedBy); const r=rentAmount(owner,g); const pay=Math.min(r,p.stars); p.stars-=pay; owner.stars+=pay; log(`${p.name} płaci ${pay} ⭐ dla ${owner.name}`); nextPlayer(); }
+}
+
+function onChance(p,idx,t){ const k=t.npc||'wujek_bartek'; showNPC(k,'Niespodzianka! +1 ⭐'); p.stars+=1; renderBar(); nextPlayer(); }
+function onChallenge(p,idx,t){ const k=t.npc||'ania'; showNPC(k,'Kliknij przycisk 5× w 4s!'); let clicks=0; const start=Date.now(); const b=document.createElement('button'); b.className='btn primary'; b.textContent='Klik!'; const panel=document.querySelector('.panel:last-child'); panel.appendChild(b); const timer=setInterval(()=>{ if(Date.now()-start>4000){ clearInterval(timer); b.remove(); nextPlayer(); }},200); b.onclick=()=>{ clicks++; if(clicks>=5){ clearInterval(timer); p.stars+=1; renderBar(); log('Brawo! +1 ⭐'); b.remove(); nextPlayer(); } }; }
+function resolveTile(p,idx){ const t=TILES[idx]; if(t.type==='prop') onProperty(p,idx,t); else if(t.type==='chance') onChance(p,idx,t); else if(t.type==='challenge') onChallenge(p,idx,t); else nextPlayer(); }
+
+function nextPlayer(){ turn=(turn+1)%players.length; renderBar(); }
+document.getElementById('rollBtn').onclick=()=>{ if(rolling) return; rolling=true; const v=Math.floor(Math.random()*6)+1; const faces={1:'rotateX(0deg) rotateY(0deg)',2:'rotateY(-90deg)',3:'rotateY(180deg)',4:'rotateY(90deg)',5:'rotateX(-90deg)',6:'rotateX(90deg)'}; document.getElementById('cube').style.transform=faces[v]+' rotateZ(360deg)'; setTimeout(()=>{ applyRoll(v); rolling=false; }, 950); };
+
+function init(){
+  renderRing(); renderBar(); placePieces(); log('Nowa gra! START=+2 ⭐');
+}
+init();
+</script>
+</body></html>

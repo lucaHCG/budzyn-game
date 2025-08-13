@@ -1,0 +1,49 @@
+
+/* v1.0 styles (simplified) */
+:root{ --ink:#1b1c20; --muted:#6b7280; --glass:#ffffffee; --border:#e5e7eb; --shadow:0 10px 24px rgba(0,0,0,.06) }
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent }
+body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Arial; color:var(--ink); background:linear-gradient(180deg,#fff,#f7faff) }
+h1,h2,h3{ margin:0 }
+button{ cursor:pointer }
+.btn{ border:0; border-radius:14px; padding:.8rem 1rem; font-weight:800; color:#fff; box-shadow:var(--shadow) }
+.btn.primary{ background:linear-gradient(180deg,#8b5cf6,#6d28d9) }
+.btn.secondary{ background:linear-gradient(180deg,#0ea5e9,#0369a1) }
+.btn.ghost{ background:#fff; color:#111; box-shadow:0 0 0 2px #e5e7eb inset }
+.wrap{ max-width:1100px; margin:0 auto; padding:14px }
+.panel{ background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:12px; box-shadow:var(--shadow) }
+.row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+.hero{ background:#fff; border:1px solid var(--border); border-radius:24px; box-shadow:var(--shadow); overflow:hidden }
+.hero .cover{ position:relative; height:42vh; min-height:280px; background:#e0e7ff; display:grid; place-items:center }
+.hero .cover img{ width:100%; height:100%; object-fit:cover }
+.hero-content{ display:grid; grid-template-columns:1fr 360px; gap:12px; padding:12px }
+@media (max-width:900px){ .hero-content{ grid-template-columns:1fr } }
+.cards{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px }
+.cardP{ display:flex; gap:10px; align-items:center; border:2px solid #eee; border-radius:16px; padding:10px; background:#fff; cursor:pointer }
+.cardP.selected{ border-color:#6d28d9; background:linear-gradient(180deg,#faf5ff,#fff) }
+.avatar{ width:64px; height:64px; border-radius:14px; overflow:hidden; display:grid; place-items:center; background:#f1f5f9; font-weight:900; color:#111 }
+.avatar img{ width:100%; height:100%; object-fit:cover }
+.boardwrap{ position:relative; background:var(--glass); border:1px solid var(--border); border-radius:22px; box-shadow:var(--shadow); padding:12px; min-height:760px }
+.center-panel{ position:absolute; inset:22% 22%; background:linear-gradient(180deg,#fff,#f8f7ff); border:1px solid var(--border); border-radius:20px; display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; text-align:center; padding:10px; z-index:0 }
+.ring{ position:absolute; inset:12px; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); gap:10px; z-index:0 }
+.tile{ position:relative; background:#fff; border:2px solid #e7ddff; border-radius:16px; padding:8px; box-shadow:0 8px 18px rgba(0,0,0,.05) }
+.idx{ position:absolute; top:6px; left:8px; font-size:.72rem; opacity:.5 }
+.label{ font-size:.92rem; font-weight:700 }
+.group{ height:8px; border-radius:6px; background:var(--pcolor) }
+.tile.start{ background:linear-gradient(180deg,#fffbe6,#ffe082); border-color:#f2cc3f }
+.dice3d{ width:90px; height:90px; perspective:600px }
+.cube{ position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .9s cubic-bezier(.2,.8,.2,1) }
+.face{ position:absolute; width:100%; height:100%; background:#fff; border:2px solid #111; border-radius:14px; display:grid; place-items:center; font-size:2rem }
+.face.one{ transform:rotateY(0deg) translateZ(45px) }
+.face.two{ transform:rotateY(90deg) translateZ(45px) }
+.face.three{ transform:rotateY(180deg) translateZ(45px) }
+.face.four{ transform:rotateY(-90deg) translateZ(45px) }
+.face.five{ transform:rotateX(90deg) translateZ(45px) }
+.face.six{ transform:rotateX(-90deg) translateZ(45px) }
+.badgebar{ display:flex; gap:8px; flex-wrap:wrap }
+.badge{ display:flex; gap:10px; align-items:center; background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:8px 12px; box-shadow:var(--shadow) }
+.badge .avatar{ width:40px; height:40px; border-radius:10px }
+.piece{ position:absolute; width:28px; height:28px; border-radius:50%; outline:2px solid #111; outline-offset:-2px; transform:translate(-50%,-50%); transition:transform .3s; z-index:5 }
+.piece.small{ width:22px; height:22px }
+.npc{ position:fixed; right:12px; bottom:12px; display:none; align-items:center; gap:10px; background:#fff; border:2px solid #e7ddff; border-radius:14px; padding:8px; box-shadow:var(--shadow); z-index:25 }
+.npc .thumb{ width:64px; height:64px; border-radius:12px; overflow:hidden; background:#f1f5f9; display:grid; place-items:center }
+.npc .thumb img{ width:100%; height:100%; object-fit:cover }
