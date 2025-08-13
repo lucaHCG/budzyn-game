@@ -13,8 +13,10 @@ button{ cursor:pointer }
 .panel{ background:var(--glass); border:1px solid var(--border); border-radius:18px; padding:12px; box-shadow:var(--shadow) }
 .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
 .hero{ background:#fff; border:1px solid var(--border); border-radius:24px; box-shadow:var(--shadow); overflow:hidden }
-.hero .cover{ position:relative; height:42vh; min-height:280px; background:#e0e7ff; display:grid; place-items:center }
-.hero .cover img{ width:100%; height:100%; object-fit:cover }
+.hero .cover { position: relative; height: 42vh; min-height: 280px; background: #0d1220; /* neutral background behind the image */  display: grid;  place-items: center;
+}
+.hero .cover img {  width: 100%; height: 100%; object-fit: contain; /* show entire image, no cropping */
+}
 .hero-content{ display:grid; grid-template-columns:1fr 360px; gap:12px; padding:12px }
 @media (max-width:900px){ .hero-content{ grid-template-columns:1fr } }
 .cards{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px }
