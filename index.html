@@ -4,7 +4,43 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Rodzinna Przygoda – Budzyń</title>
-  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root{ --ink:#111827; --muted:#6b7280; }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Arial; color:var(--ink); background:linear-gradient(180deg,#ffffff,#f7faff); }
+    .wrap{ max-width:1100px; margin:0 auto; padding:14px; }
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .panel{ background:#ffffffee; border:1px solid #e5e7eb; border-radius:18px; padding:12px; box-shadow:0 8px 20px rgba(0,0,0,.06); }
+    .btn{ border:0; border-radius:14px; padding:.8rem 1rem; font-weight:800; color:#fff; cursor:pointer; }
+    .btn.primary{ background:linear-gradient(180deg,#8b5cf6,#6d28d9); }
+    .btn.secondary{ background:linear-gradient(180deg,#0ea5e9,#0369a1); }
+    .hero{ background:#fff; border:1px solid #e5e7eb; border-radius:24px; box-shadow:0 10px 26px rgba(0,0,0,.08); overflow:hidden; }
+    .hero-content{ display:grid; grid-template-columns:1fr 360px; gap:12px; padding:12px; }
+    @media (max-width:900px){ .hero-content{ grid-template-columns:1fr; } }
+    .cover{ position:relative; height:42vh; min-height:280px; background:#0d1220; display:grid; place-items:center; }
+    .cover img{ width:100%; height:100%; object-fit:contain; }
+    .small{ color:var(--muted); font-size:.92rem; }
+
+    /* Cards */
+    .cards{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
+    .cardP{
+      background: var(--bg, #f1f5f9);
+      color: var(--fg, #111);
+      border-radius:16px; padding:10px; display:flex; gap:10px; align-items:center;
+      box-shadow:0 10px 22px rgba(0,0,0,.12); cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .cardP:hover{ transform: translateY(-2px); box-shadow:0 16px 28px rgba(0,0,0,.18); }
+    .cardP .avatar{
+      width:64px; height:64px; border-radius:14px; overflow:hidden;
+      background: rgba(255,255,255,.18);
+      box-shadow: inset 0 0 0 3px rgba(255,255,255,.35);
+      display:grid; place-items:center; font-weight:900;
+    }
+    .cardP .avatar img{ width:100%; height:100%; object-fit:cover; }
+    .cardP .cardInfo{ font-size:1.05rem; font-weight:800; text-shadow:0 1px 2px rgba(0,0,0,.15); }
+    .cardP.sel{ outline:3px solid rgba(255,255,255,.9); outline-offset:3px; }
+  </style>
 </head>
 <body>
   <noscript>
@@ -19,35 +55,4 @@
         <img src="assets/cover.jpg" alt="cover">
       </div>
       <div class="hero-content">
-        <div class="panel">
-          <h2>Rodzinna Przygoda – Budzyń</h2>
-          <p>Wybierz graczy (z Playmobil avatarami), włącz muzykę i start!</p>
-          <div class="row">
-            <button class="btn primary" id="toggleMusic">🔈 Muzyka</button>
-            <a class="btn secondary" href="#players">Wybierz graczy</a>
-          </div>
-        </div>
-        <div class="panel">
-          <strong>Instrukcja</strong>
-          <div class="small">
-            Avatary są w <code>assets/avatars/</code>. Podmień pliki tymi samymi nazwami (PNG).<br>
-            Muzyka: wrzuć 3 pliki do <code>assets/audio/track1.mp3</code>, <code>track2.mp3</code>, <code>track3.mp3</code>.
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <a id="players"></a>
-    <div class="panel">
-      <h3>Wybór graczy (2–4)</h3>
-      <div class="cards" id="cards"></div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn primary" id="startBtn" disabled>Start!</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- External JS only -->
-  <script src="js/home.js" defer></script>
-</body>
-</html>
+        <div clas
