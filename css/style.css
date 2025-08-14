@@ -49,3 +49,12 @@ button{ cursor:pointer }
 .npc{ position:fixed; right:12px; bottom:12px; display:none; align-items:center; gap:10px; background:#fff; border:2px solid #e7ddff; border-radius:14px; padding:8px; box-shadow:var(--shadow); z-index:25 }
 .npc .thumb{ width:64px; height:64px; border-radius:12px; overflow:hidden; background:#f1f5f9; display:grid; place-items:center }
 .npc .thumb img{ width:100%; height:100%; object-fit:cover }
+/* Give each avatar a soft ring using the player's color */
+.cardP { border: 2px solid #eee; border-radius: 16px; }
+.cardP .avatar { 
+  border-radius: 14px; 
+  box-shadow:
+    0 0 0 3px var(--ring) inset,     /* inner color ring */
+    0 8px 18px rgba(0,0,0,.08);      /* soft drop shadow */
+}
+.cardP.selected { outline: 3px solid var(--ring); outline-offset: 2px; }
