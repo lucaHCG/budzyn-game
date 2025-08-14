@@ -39,12 +39,16 @@
 <script>
 const PEOPLE = [{"key": "luca", "name": "Luca", "color": "#1f2a44"}, {"key": "sylwia", "name": "Sylwia", "color": "#ff7a00"}, {"key": "oli", "name": "Oli", "color": "#e10600"}, {"key": "vicky", "name": "Vicky", "color": "#ff5fa2"}, {"key": "leon", "name": "Leon", "color": "#8a8a8a"}, {"key": "nela", "name": "Nela", "color": "#dc143c"}];
 const SELECTED = new Set();
+
 function cardHtml(p){
-  return `<div class="cardP" data-key="${p.key}">
+  return `
+  <div class="cardP" data-key="${p.key}" style="--ring:${p.color}">
     <div class="avatar"><img src="assets/avatars/${p.key}.png" alt="${p.name}"></div>
-    <div><div><b>${p.name}</b></div><div class="small">Kolor: ${p.color}</div></div>
+    <div><div><b>${p.name}</b></div></div>
   </div>`;
 }
+  
+
 function renderCards(){
   const box=document.getElementById('cards'); box.innerHTML=PEOPLE.map(cardHtml).join('');
   box.querySelectorAll('.cardP').forEach(el=>{ el.onclick=()=>{ const k=el.dataset.key; if(SELECTED.has(k)) SELECTED.delete(k); else SELECTED.add(k); el.classList.toggle('selected'); document.getElementById('startBtn').disabled = !(SELECTED.size>=2 && SELECTED.size<=4); }; });
