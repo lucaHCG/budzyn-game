@@ -58,3 +58,27 @@ button{ cursor:pointer }
     0 8px 18px rgba(0,0,0,.08);      /* soft drop shadow */
 }
 .cardP.selected { outline: 3px solid var(--ring); outline-offset: 2px; }
+/* Colored player cards with readable text */
+.cardP{
+  background: var(--bg);
+  color: var(--fg);
+  border: 0;
+  border-radius: 16px;
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  box-shadow: 0 10px 22px rgba(0,0,0,.14);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.cardP:hover{ transform: translateY(-2px); box-shadow: 0 16px 28px rgba(0,0,0,.18); }
+.cardP .avatar{
+  width: 64px; height: 64px; border-radius: 14px; overflow: hidden;
+  background: rgba(255,255,255,.18);
+  box-shadow: inset 0 0 0 3px rgba(255,255,255,.35);
+}
+.cardP .avatar img{ width:100%; height:100%; object-fit: cover; }
+.cardP .cardInfo{ font-size: 1.05rem; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,.25); }
+
+/* Selected outline uses the same bg color but more visible */
+.cardP.selected{ outline: 3px solid rgba(255,255,255,.9); outline-offset: 3px; }
