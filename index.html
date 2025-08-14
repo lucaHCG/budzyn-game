@@ -47,7 +47,37 @@ const PEOPLE = [
 ];
 const SELECTED = new Set();
 
-/* ----- HELPERS FOR READABLE TEXT ----- */
+/* ----- HELPERS ----- */
 function hexToRgb(hex){
   const m = hex.replace('#','');
-  const r = m.length===3 ? parseIn
+  const r = m.length===3 ? parseInt(m[0]+m[0],16) : parseInt(m.slice(0,2),16);
+  const g = m.length===3 ? parseInt(m[1]+m[1],16) : parseInt(m.slice(2,4),16);
+  const b = m.length===3 ? parseInt(m[2]+m[2],16) : parseInt(m.slice(4,6),16);
+  return {r,g,b};
+}
+function bestFg(hex){
+  const {r,g,b} = hexToRgb(hex);
+  const yiq = (r*299 + g*587 + b*114) / 1000;
+  return yiq >= 140 ? '#111' : '#fff';
+}
+
+/* ----- RENDER ----- */
+function renderCards(){
+  const box = document.getElementById('cards');
+  box.innerHTML = ''; // clear
+
+  PEOPLE.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'cardP';
+    // set CSS variables for color & text
+    card.style.setProperty('--bg', p.color);
+    card.style.setProperty('--fg', bestFg(p.color));
+    card.dataset.key = p.key;
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    const img = document.createElement('img');
+    img.src = `assets/avatars/${p.key}.png`;
+    img.alt = p.name;
+    // if image fails, keep layout
+    img.on
