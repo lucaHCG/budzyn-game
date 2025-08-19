@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rodzinna Przygoda – Budzyń</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="cover"><img src="assets/cover.jpg" alt="cover"></div>
+    <div class="hero-content">
+      <div class="panel">
+        <h2>Rodzinna Przygoda – Budzyń</h2>
+        <p>Wybierz graczy (z Playmobil avatarami), włącz muzykę i start!</p>
+        <div class="row">
+          <button class="btn primary" id="toggleMusic">🔈 Muzyka</button>
+          <a class="btn secondary" href="#players">Wybierz graczy</a>
+        </div>
+      </div>
+      <div class="panel">
+        <strong>Instrukcja</strong>
+        <div class="small">
+          Avatary są w <code>assets/avatars/</code>. Podmień pliki tymi samymi nazwami (PNG).<br>
+          Muzyka: wrzuć 3 pliki do <code>assets/audio/track1.mp3</code>, <code>track2.mp3</code>, <code>track3.mp3</code>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a id="players"></a>
+  <div class="panel">
+    <h3>Wybór graczy (2–4)</h3>
+    <div class="cards" id="cards"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn primary" id="startBtn" disabled>Start!</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/home.js"></script>
+</body>
+</html>
